@@ -1,7 +1,14 @@
 import { create } from "zustand";
 
+import { uid } from "@/lib/id";
 import { createField, createOption, createEmptyForm } from "@/lib/form-factory";
-import type { FieldType, FormField, FieldOption, FormDefinition } from "@/types/form";
+import type {
+  FieldType,
+  FormField,
+  FieldOption,
+  FormRule,
+  FormDefinition,
+} from "@/types/form";
 
 type FormBuilderState = {
   form: FormDefinition;
@@ -24,6 +31,11 @@ type FormBuilderState = {
   addOption: (fieldId: string) => void;
   updateOption: (fieldId: string, optionId: string, patch: Partial<FieldOption>) => void;
   removeOption: (fieldId: string, optionId: string) => void;
+
+  // Kurallar (bağımlı validasyon / koşullu görünürlük)
+  addRule: () => void;
+  updateRule: (id: string, patch: Partial<FormRule>) => void;
+  removeRule: (id: string) => void;
 
   resetForm: () => void;
 };
@@ -118,6 +130,37 @@ export const useFormBuilderStore = create<FormBuilderState>((set) => ({
         ...f,
         options: (f.options ?? []).filter((o) => o.id !== optionId),
       })),
+    })),
+
+  addRule: () =>
+    set((s) => {
+      const fields = s.form.fields;
+      if (fields.length === 0) return s;
+      const source = fields[0];
+      const target = fields.find((f) => f.id !== source.id) ?? source;
+      const rule: FormRule = {
+        id: uid("rule"),
+        when: { fieldId: source.id, operator: "equals", value: "" },
+        action: "require",
+        targetFieldId: target.id,
+      };
+      return { form: touch({ ...s.form, rules: [...s.form.rules, rule] }) };
+    }),
+
+  updateRule: (id, patch) =>
+    set((s) => ({
+      form: touch({
+        ...s.form,
+        rules: s.form.rules.map((r) => (r.id === id ? { ...r, ...patch } : r)),
+      }),
+    })),
+
+  removeRule: (id) =>
+    set((s) => ({
+      form: touch({
+        ...s.form,
+        rules: s.form.rules.filter((r) => r.id !== id),
+      }),
     })),
 
   resetForm: () =>

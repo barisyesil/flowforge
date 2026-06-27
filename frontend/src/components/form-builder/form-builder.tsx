@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { FieldPalette } from "@/components/form-builder/field-palette";
 import { BuilderCanvas } from "@/components/form-builder/builder-canvas";
 import { FieldProperties } from "@/components/form-builder/field-properties";
+import { RulesEditor } from "@/components/form-builder/rules-editor";
 import { useFormBuilderStore } from "@/stores/form-builder-store";
 import { useFormsStore } from "@/stores/forms-store";
 
@@ -93,6 +94,9 @@ export function FormBuilder() {
           <FieldProperties />
         </div>
       </div>
+
+      {/* Koşullu mantık kuralları */}
+      <RulesEditor />
     </div>
   );
 }
