@@ -54,10 +54,13 @@ dotnet run
 
 ## Varsayılan Kullanıcılar / Roller
 
-> Login bilgileri geliştirme sırasında eklenecektir.
+Login ekranında bu hesaplara tıklayarak alanları otomatik doldurabilirsiniz.
 
-| Kullanıcı | Rol |
-|-----------|-----|
-| _eklenecek_ | Admin |
-| _eklenecek_ | Onaycı |
-| _eklenecek_ | Kullanıcı |
+| Kullanıcı Adı | Şifre | Rol |
+|---------------|-------|-----|
+| `admin` | `admin123` | Admin |
+| `onayci` | `onayci123` | Onaycı |
+| `kullanici` | `kullanici123` | Kullanıcı |
+
+> Şu an kimlik doğrulama, frontend'deki mock kullanıcılara karşı yapılır; backend
+> authentication bağlandığında gerçek doğrulamaya geçilecektir.
