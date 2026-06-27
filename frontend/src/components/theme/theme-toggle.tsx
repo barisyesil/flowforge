@@ -10,10 +10,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslation } from "@/lib/i18n/use-translation";
 
 /** Açık / koyu / sistem teması arasında geçiş. */
 export function ThemeToggle() {
   const { setTheme } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <DropdownMenu>
@@ -22,22 +24,22 @@ export function ThemeToggle() {
           <Button variant="ghost" size="icon">
             <Sun className="h-5 w-5 dark:hidden" />
             <Moon className="hidden h-5 w-5 dark:block" />
-            <span className="sr-only">Tema değiştir</span>
+            <span className="sr-only">{t("header.toggleTheme")}</span>
           </Button>
         }
       />
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => setTheme("light")}>
           <Sun className="h-4 w-4" />
-          Açık
+          {t("theme.light")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme("dark")}>
           <Moon className="h-4 w-4" />
-          Koyu
+          {t("theme.dark")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme("system")}>
           <Monitor className="h-4 w-4" />
-          Sistem
+          {t("theme.system")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
