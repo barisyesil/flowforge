@@ -2,6 +2,7 @@ import {
   LayoutDashboard,
   FileText,
   Workflow,
+  Waypoints,
   Users,
   ShieldCheck,
   Settings,
@@ -26,6 +27,7 @@ export const mainNav: NavItem[] = [
   { titleKey: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard },
   // Form tasarımı yönetimsel bir iştir; yalnızca admin görür.
   { titleKey: "nav.forms", href: "/forms", icon: FileText, roles: ["admin"] },
+  { titleKey: "nav.workflows", href: "/workflows", icon: Waypoints, roles: ["admin"] },
   { titleKey: "nav.processes", href: "/processes", icon: Workflow },
   { titleKey: "nav.users", href: "/users", icon: Users, roles: ["admin"] },
   { titleKey: "nav.roles", href: "/roles", icon: ShieldCheck, roles: ["admin"] },
