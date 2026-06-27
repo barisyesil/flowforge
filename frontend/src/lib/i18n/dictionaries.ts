@@ -62,6 +62,7 @@ const tr = {
   "dashboard.completed": "Tamamlanan İşler",
   "dashboard.recent": "Son Süreçler",
   "dashboard.noProcesses": "Henüz süreç başlatılmadı.",
+  "dashboard.myTasks": "Bekleyen Görevlerim",
 
   // Süreç durumları
   "status.pending": "Beklemede",
@@ -348,6 +349,7 @@ const en: Record<TranslationKey, string> = {
   "dashboard.completed": "Completed",
   "dashboard.recent": "Recent Processes",
   "dashboard.noProcesses": "No processes started yet.",
+  "dashboard.myTasks": "My Pending Tasks",
 
   "status.pending": "Pending",
   "status.in_progress": "In Progress",

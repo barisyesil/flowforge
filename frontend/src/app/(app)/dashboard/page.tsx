@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { Loader, CheckCircle2, XCircle } from "lucide-react";
+import { Loader, CheckCircle2, XCircle, ListTodo } from "lucide-react";
 
 import {
   Card,
@@ -13,12 +13,15 @@ import {
 } from "@/components/ui/card";
 import { StatusBadge } from "@/components/process/status-badge";
 import { useProcessesStore } from "@/stores/processes-store";
+import { useAuthStore } from "@/stores/auth-store";
 import { useTranslation } from "@/lib/i18n/use-translation";
+import { stepById, isMyTask } from "@/lib/workflow-engine";
 import type { ProcessStatus } from "@/types/process";
 
 export default function DashboardPage() {
   const processes = useProcessesStore((s) => s.processes);
   const loadProcesses = useProcessesStore((s) => s.loadProcesses);
+  const user = useAuthStore((s) => s.user);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -28,7 +31,14 @@ export default function DashboardPage() {
   const countBy = (status: ProcessStatus) =>
     processes.filter((p) => p.status === status).length;
 
+  const myTaskCount = processes.filter((p) => {
+    if (!user || p.status !== "in_progress" || !p.currentStepId) return false;
+    const step = stepById(p.workflow, p.currentStepId);
+    return step ? isMyTask(step, user) : false;
+  }).length;
+
   const stats = [
+    { label: t("dashboard.myTasks"), value: myTaskCount, icon: ListTodo },
     { label: t("status.in_progress"), value: countBy("in_progress"), icon: Loader },
     { label: t("status.completed"), value: countBy("completed"), icon: CheckCircle2 },
     { label: t("status.rejected"), value: countBy("rejected"), icon: XCircle },
@@ -42,7 +52,7 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <p className="text-sm text-muted-foreground">{t("dashboard.overview")}</p>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <Card key={stat.label}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

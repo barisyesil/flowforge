@@ -19,6 +19,9 @@ const SEED_USERS: UserRecord[] = [
   { id: "u-admin", username: "admin", password: "admin123", displayName: "Barış Yeşildağ", role: "admin" },
   { id: "u-approver", username: "onayci", password: "onayci123", displayName: "Ayşe Onay", role: "approver" },
   { id: "u-user", username: "kullanici", password: "kullanici123", displayName: "Mehmet Kullanıcı", role: "user" },
+  { id: "u-manager", username: "yonetici", password: "yonetici123", displayName: "Deniz Yönetici", role: "manager" },
+  { id: "u-finance", username: "muhasebe", password: "muhasebe123", displayName: "Elif Muhasebe", role: "finance" },
+  { id: "u-employee", username: "calisan", password: "calisan123", displayName: "Can Çalışan", role: "employee" },
 ];
 
 function delay<T>(value: T, ms = LATENCY_MS): Promise<T> {
