@@ -1,0 +1,13 @@
+# Tüm metin dosyalarında satır sonunu normalize et (Windows CRLF gürültüsünü önler)
+* text=auto eol=lf
+
+# Windows'a özgü script dosyaları CRLF kalsın
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# İkili dosyalar dokunulmasın
+*.png binary
+*.jpg binary
+*.ico binary
+*.db binary
