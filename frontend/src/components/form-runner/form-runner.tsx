@@ -23,10 +23,11 @@ type SubmitStatus = "idle" | "submitting" | "success" | "error";
  */
 export function FormRunner({
   form,
-  onComplete,
+  onSubmit,
 }: {
   form: FormDefinition;
-  onComplete?: (data: FormSubmission) => void;
+  /** Doğrulama geçince çağrılır; hata fırlatırsa error state'e geçilir. */
+  onSubmit: (data: FormSubmission) => Promise<void>;
 }) {
   const [values, setValues] = useState<FormSubmission>({});
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -54,15 +55,12 @@ export function FormRunner({
 
     setStatus("submitting");
     try {
-      // Backend'e POST ediliyormuş gibi gecikme.
-      await new Promise((resolve) => setTimeout(resolve, 600));
       const payload = buildSubmission(form, values);
+      await onSubmit(payload);
       setResult(payload);
       setStatus("success");
       // eslint-disable-next-line no-console
       console.log("Form gönderimi (JSON):", payload);
-      toast.success("Form başarıyla gönderildi.");
-      onComplete?.(payload);
     } catch {
       setStatus("error");
       toast.error("Gönderim sırasında bir hata oluştu.");

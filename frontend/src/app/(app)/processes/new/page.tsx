@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { ArrowLeft, FileText, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -10,11 +12,17 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FormRunner } from "@/components/form-runner/form-runner";
 import { useFormsStore } from "@/stores/forms-store";
+import { useProcessesStore } from "@/stores/processes-store";
+import { useAuthStore } from "@/stores/auth-store";
+import type { FormSubmission } from "@/types/form";
 
 export default function NewProcessPage() {
+  const router = useRouter();
   const forms = useFormsStore((s) => s.forms);
   const status = useFormsStore((s) => s.status);
   const loadForms = useFormsStore((s) => s.loadForms);
+  const startProcess = useProcessesStore((s) => s.startProcess);
+  const user = useAuthStore((s) => s.user);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -23,6 +31,14 @@ export default function NewProcessPage() {
   }, [loadForms]);
 
   const selected = forms.find((f) => f.id === selectedId);
+
+  async function handleStart(payload: FormSubmission) {
+    if (!selected || !user) throw new Error("Eksik bağlam");
+    const created = await startProcess(selected, payload, user.displayName);
+    if (!created) throw new Error("Süreç başlatılamadı");
+    toast.success("Süreç başlatıldı.");
+    router.push(`/processes/${created.id}`);
+  }
 
   // Yükleniyor
   if (status === "loading" && forms.length === 0) {
@@ -73,7 +89,7 @@ export default function NewProcessPage() {
         </div>
         <Card>
           <div className="p-6">
-            <FormRunner form={selected} />
+            <FormRunner form={selected} onSubmit={handleStart} />
           </div>
         </Card>
       </div>
