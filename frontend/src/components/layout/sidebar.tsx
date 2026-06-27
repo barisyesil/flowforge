@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
-import { mainNav } from "@/lib/navigation";
+import { navForRole } from "@/lib/navigation";
+import { useAuthStore } from "@/stores/auth-store";
 
 /**
  * Marka logosu + ana navigasyon. Hem masaüstü (sabit aside) hem mobil
@@ -12,6 +13,8 @@ import { mainNav } from "@/lib/navigation";
  */
 export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const role = useAuthStore((s) => s.user?.role);
+  const navItems = navForRole(role);
 
   return (
     <div className="flex h-full flex-col bg-sidebar">
@@ -25,7 +28,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
       {/* Navigasyon */}
       <nav className="flex-1 space-y-1 p-3">
-        {mainNav.map((item) => {
+        {navItems.map((item) => {
           const active =
             pathname === item.href || pathname.startsWith(item.href + "/");
           return (

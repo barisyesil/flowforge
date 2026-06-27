@@ -6,22 +6,33 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import type { Role } from "@/types/auth";
+
 /**
- * Uygulamanın sol menü yapısı. Rol bazlı gösterim (bonus) için her öğeye
- * ileride `roles` alanı eklenecek; şimdilik tüm roller için görünür.
+ * Uygulamanın sol menü yapısı. `roles` verilmişse öğe yalnızca o rollerde görünür
+ * (rol bazlı gösterim bonusu). Verilmemişse tüm roller görür.
  */
 export type NavItem = {
   title: string;
   href: string;
   icon: LucideIcon;
+  roles?: Role[];
 };
 
 export const mainNav: NavItem[] = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { title: "Form Tasarımı", href: "/forms", icon: FileText },
+  // Form tasarımı yönetimsel bir iştir; yalnızca admin görür.
+  { title: "Form Tasarımı", href: "/forms", icon: FileText, roles: ["admin"] },
   { title: "Süreçler / İşlerim", href: "/processes", icon: Workflow },
   { title: "Ayarlar", href: "/settings", icon: Settings },
 ];
+
+/** Verilen role görünür menü öğelerini döndürür. */
+export function navForRole(role: Role | undefined): NavItem[] {
+  return mainNav.filter(
+    (item) => !item.roles || (role !== undefined && item.roles.includes(role)),
+  );
+}
 
 /** Aktif yola karşılık gelen sayfa başlığını döndürür (header'da kullanılır). */
 export function getTitleByPath(pathname: string): string {
