@@ -26,6 +26,8 @@ type FormBuilderState = {
   updateField: (id: string, patch: Partial<FormField>) => void;
   selectField: (id: string | null) => void;
   moveField: (id: string, direction: "up" | "down") => void;
+  /** Sürükle-bırak için: bir alanı başka bir alanın konumuna taşır. */
+  reorderFields: (activeId: string, overId: string) => void;
 
   // Seçenekler (select / radio)
   addOption: (fieldId: string) => void;
@@ -103,6 +105,18 @@ export const useFormBuilderStore = create<FormBuilderState>((set) => ({
       const j = direction === "up" ? i - 1 : i + 1;
       if (j < 0 || j >= fields.length) return s;
       [fields[i], fields[j]] = [fields[j], fields[i]];
+      return { form: touch({ ...s.form, fields }) };
+    }),
+
+  reorderFields: (activeId, overId) =>
+    set((s) => {
+      if (activeId === overId) return s;
+      const fields = [...s.form.fields];
+      const from = fields.findIndex((f) => f.id === activeId);
+      const to = fields.findIndex((f) => f.id === overId);
+      if (from === -1 || to === -1) return s;
+      const [moved] = fields.splice(from, 1);
+      fields.splice(to, 0, moved);
       return { form: touch({ ...s.form, fields }) };
     }),
 
