@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
-import { Menu, User } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Menu, LogOut } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import {
@@ -17,15 +18,36 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarContent } from "@/components/layout/sidebar";
 import { getTitleByPath } from "@/lib/navigation";
+import { useAuthStore } from "@/stores/auth-store";
+import { roleLabels } from "@/types/auth";
+
+/** Görünen isimden baş harfleri üretir (avatar fallback). */
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
 
 /**
  * Üst bar: mobilde menüyü açan tetikleyici, aktif sayfa başlığı ve
- * aktif kullanıcı menüsü. (Kullanıcı bilgisi auth bağlandığında store'dan gelecek.)
+ * aktif kullanıcı menüsü (global oturum durumundan).
  */
 export function AppHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const title = getTitleByPath(pathname);
+
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+
+  function handleLogout() {
+    logout();
+    router.replace("/login");
+  }
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b bg-background px-4 md:px-6">
@@ -56,20 +78,29 @@ export function AppHeader() {
             <Button variant="ghost" className="gap-2 px-2">
               <Avatar className="h-7 w-7">
                 <AvatarFallback className="text-xs">
-                  <User className="h-4 w-4" />
+                  {user ? getInitials(user.displayName) : "?"}
                 </AvatarFallback>
               </Avatar>
               <span className="hidden text-sm font-medium sm:inline">
-                Misafir
+                {user?.displayName ?? "—"}
               </span>
             </Button>
           }
         />
-        <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuLabel>Hesabım</DropdownMenuLabel>
+        <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuLabel className="flex flex-col gap-1">
+            <span>{user?.displayName ?? "—"}</span>
+            {user && (
+              <Badge variant="secondary" className="w-fit text-xs font-normal">
+                {roleLabels[user.role]}
+              </Badge>
+            )}
+          </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem disabled>Profil</DropdownMenuItem>
-          <DropdownMenuItem disabled>Çıkış Yap</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleLogout}>
+            <LogOut className="h-4 w-4" />
+            Çıkış Yap
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </header>
