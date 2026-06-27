@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarContent } from "@/components/layout/sidebar";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { getTitleByPath } from "@/lib/navigation";
 import { useAuthStore } from "@/stores/auth-store";
 import { roleLabels } from "@/types/auth";
@@ -71,8 +72,11 @@ export function AppHeader() {
         <h1 className="text-base font-semibold md:text-lg">{title}</h1>
       </div>
 
-      {/* Aktif kullanıcı */}
-      <DropdownMenu>
+      <div className="flex items-center gap-1">
+        <ThemeToggle />
+
+        {/* Aktif kullanıcı */}
+        <DropdownMenu>
         <DropdownMenuTrigger
           render={
             <Button variant="ghost" className="gap-2 px-2">
@@ -97,12 +101,13 @@ export function AppHeader() {
             )}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleLogout}>
-            <LogOut className="h-4 w-4" />
-            Çıkış Yap
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            <DropdownMenuItem onClick={handleLogout}>
+              <LogOut className="h-4 w-4" />
+              Çıkış Yap
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </header>
   );
 }
