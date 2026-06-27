@@ -85,10 +85,10 @@ export default function DashboardPage() {
               >
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">
-                    {process.workflow.name}
+                    {process.workflow?.name ?? "Untitled workflow"}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {process.startedByName}
+                    {process.startedByName ?? "Unknown"}
                   </p>
                 </div>
                 <StatusBadge status={process.status} />

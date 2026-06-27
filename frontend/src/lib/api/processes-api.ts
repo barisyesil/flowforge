@@ -16,10 +16,43 @@ function delay<T>(value: T, ms = LATENCY_MS): Promise<T> {
   return new Promise((resolve) => setTimeout(() => resolve(value), ms));
 }
 
+function normalizeProcess(process: Partial<ProcessInstance>): ProcessInstance {
+  const now = new Date().toISOString();
+  const workflow: WorkflowDefinition = process.workflow && typeof process.workflow === "object"
+    ? {
+        ...process.workflow,
+        name: process.workflow.name ?? "Untitled workflow",
+      }
+    : {
+        id: process.id ?? uid("wf"),
+        name: "Untitled workflow",
+        description: "",
+        steps: [],
+        startStepId: null,
+        version: 1,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+  return {
+    id: process.id ?? uid("proc"),
+    workflow,
+    currentStepId: process.currentStepId ?? null,
+    status: process.status ?? "in_progress",
+    data: process.data ?? {},
+    startedByName: process.startedByName ?? "Unknown",
+    createdAt: process.createdAt ?? now,
+    updatedAt: process.updatedAt ?? now,
+    history: Array.isArray(process.history) ? process.history : [],
+  };
+}
+
 function read(): ProcessInstance[] {
   if (typeof window === "undefined") return [];
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
+    if (!Array.isArray(raw)) return [];
+    return raw.map((process) => normalizeProcess(process as Partial<ProcessInstance>));
   } catch {
     return [];
   }
