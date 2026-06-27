@@ -3,6 +3,7 @@ import {
   FileText,
   Workflow,
   Users,
+  ShieldCheck,
   Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -27,6 +28,7 @@ export const mainNav: NavItem[] = [
   { titleKey: "nav.forms", href: "/forms", icon: FileText, roles: ["admin"] },
   { titleKey: "nav.processes", href: "/processes", icon: Workflow },
   { titleKey: "nav.users", href: "/users", icon: Users, roles: ["admin"] },
+  { titleKey: "nav.roles", href: "/roles", icon: ShieldCheck, roles: ["admin"] },
   { titleKey: "nav.settings", href: "/settings", icon: Settings },
 ];
 

@@ -19,10 +19,12 @@ import {
 import { useAuthStore } from "@/stores/auth-store";
 import { authenticate, demoCredentials } from "@/lib/api/users-api";
 import { useTranslation } from "@/lib/i18n/use-translation";
+import { useRoleLabel } from "@/hooks/use-role-label";
 
 export default function LoginPage() {
   const router = useRouter();
   const { t } = useTranslation();
+  const roleLabel = useRoleLabel();
   const login = useAuthStore((s) => s.login);
   const user = useAuthStore((s) => s.user);
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
@@ -124,7 +126,7 @@ export default function LoginPage() {
                   {c.username} / {c.password}
                 </span>
                 <Badge variant="secondary" className="font-normal">
-                  {t(`role.${c.role}`)}
+                  {roleLabel(c.role)}
                 </Badge>
               </button>
             ))}

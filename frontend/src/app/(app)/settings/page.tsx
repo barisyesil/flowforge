@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
 import { useUsersStore } from "@/stores/users-store";
 import { useTranslation } from "@/lib/i18n/use-translation";
+import { useRoleLabel } from "@/hooks/use-role-label";
 import type { Language } from "@/lib/i18n/dictionaries";
 
 const THEME_OPTIONS = [
@@ -37,6 +38,7 @@ const LANGUAGE_OPTIONS: { value: Language; labelKey: "lang.tr" | "lang.en" }[] =
 export default function SettingsPage() {
   const router = useRouter();
   const { t, language, setLanguage } = useTranslation();
+  const roleLabel = useRoleLabel();
   const { theme, setTheme } = useTheme();
 
   const user = useAuthStore((s) => s.user);
@@ -92,7 +94,7 @@ export default function SettingsPage() {
             </span>
             <span className="flex items-center gap-2 text-muted-foreground">
               {t("settings.role")}:
-              {user && <Badge variant="secondary">{t(`role.${user.role}`)}</Badge>}
+              {user && <Badge variant="secondary">{roleLabel(user.role)}</Badge>}
             </span>
           </div>
           <Button onClick={handleSaveProfile} disabled={saving}>

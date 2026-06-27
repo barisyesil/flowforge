@@ -1,5 +1,9 @@
-/** Sistemdeki roller. Her kullanıcı tek bir role sahiptir (doküman gereği). */
-export type Role = "admin" | "approver" | "user";
+/**
+ * Rol kimliği. Dinamik roller desteklenir: sistem rolleri ("admin", "approver",
+ * "user") rezervedir, admin yeni roller (ör. "Yönetici", "Muhasebe") ekleyebilir.
+ * "admin" erişim kontrolü için özel rol olarak kalır.
+ */
+export type Role = string;
 
 export type User = {
   id: string;
@@ -8,9 +12,10 @@ export type User = {
   role: Role;
 };
 
-/** Rollerin arayüzde gösterilecek Türkçe etiketleri. */
-export const roleLabels: Record<Role, string> = {
-  admin: "Admin",
-  approver: "Onaycı",
-  user: "Kullanıcı",
+/** Admin tarafından yönetilen rol tanımı. */
+export type RoleDefinition = {
+  id: string;
+  name: string;
+  /** Sistem rolü mü? (silinemez, etiketi i18n'den gelir) */
+  isSystem: boolean;
 };

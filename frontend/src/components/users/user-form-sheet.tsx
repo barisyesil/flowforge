@@ -21,11 +21,11 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { useUsersStore } from "@/stores/users-store";
+import { useRolesStore } from "@/stores/roles-store";
 import { useTranslation } from "@/lib/i18n/use-translation";
+import { useRoleLabel } from "@/hooks/use-role-label";
 import type { NewUserInput } from "@/lib/api/users-api";
 import type { User, Role } from "@/types/auth";
-
-const ROLES: Role[] = ["admin", "approver", "user"];
 
 /** Kullanıcı ekleme/düzenleme yan paneli. editingUser null ise ekleme modudur. */
 export function UserFormSheet({
@@ -38,8 +38,10 @@ export function UserFormSheet({
   editingUser: User | null;
 }) {
   const { t } = useTranslation();
+  const roleLabel = useRoleLabel();
   const addUser = useUsersStore((s) => s.addUser);
   const editUser = useUsersStore((s) => s.editUser);
+  const roles = useRolesStore((s) => s.roles);
 
   const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
@@ -59,7 +61,9 @@ export function UserFormSheet({
     }
   }, [open, editingUser]);
 
-  const roleItems = Object.fromEntries(ROLES.map((r) => [r, t(`role.${r}`)]));
+  const roleItems = Object.fromEntries(
+    roles.map((r) => [r.id, roleLabel(r.id)]),
+  );
 
   async function handleSave() {
     if (
@@ -152,9 +156,9 @@ export function UserFormSheet({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {ROLES.map((r) => (
-                  <SelectItem key={r} value={r}>
-                    {t(`role.${r}`)}
+                {roles.map((r) => (
+                  <SelectItem key={r.id} value={r.id}>
+                    {roleLabel(r.id)}
                   </SelectItem>
                 ))}
               </SelectContent>

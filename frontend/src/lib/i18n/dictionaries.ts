@@ -225,6 +225,23 @@ const tr = {
   "users.fillAll": "Lütfen tüm alanları doldurun.",
   "users.empty": "Henüz kullanıcı yok.",
   "users.you": "(siz)",
+
+  // Rol yönetimi (yalnızca admin)
+  "nav.roles": "Roller",
+  "roles.subtitle": "Sistem ve şirket rollerini yönetin.",
+  "roles.add": "Rol Ekle",
+  "roles.newRole": "Yeni Rol",
+  "roles.editRole": "Rolü Düzenle",
+  "roles.name": "Rol Adı",
+  "roles.system": "Sistem",
+  "roles.created": "Rol eklendi.",
+  "roles.updated": "Rol güncellendi.",
+  "roles.deleted": "Rol silindi.",
+  "roles.deleteConfirm": "Bu rolü silmek istediğinize emin misiniz?",
+  "roles.nameTaken": "Bu rol adı zaten var.",
+  "roles.systemLocked": "Sistem rolleri değiştirilemez.",
+  "roles.nameRequired": "Rol adı boş olamaz.",
+  "roles.empty": "Henüz rol yok.",
 } as const;
 
 export type TranslationKey = keyof typeof tr;
@@ -427,6 +444,22 @@ const en: Record<TranslationKey, string> = {
   "users.fillAll": "Please fill in all fields.",
   "users.empty": "No users yet.",
   "users.you": "(you)",
+
+  "nav.roles": "Roles",
+  "roles.subtitle": "Manage system and company roles.",
+  "roles.add": "Add Role",
+  "roles.newRole": "New Role",
+  "roles.editRole": "Edit Role",
+  "roles.name": "Role Name",
+  "roles.system": "System",
+  "roles.created": "Role created.",
+  "roles.updated": "Role updated.",
+  "roles.deleted": "Role deleted.",
+  "roles.deleteConfirm": "Are you sure you want to delete this role?",
+  "roles.nameTaken": "This role name already exists.",
+  "roles.systemLocked": "System roles cannot be modified.",
+  "roles.nameRequired": "Role name cannot be empty.",
+  "roles.empty": "No roles yet.",
 };
 
 export const dictionaries: Record<Language, Record<TranslationKey, string>> = {

@@ -22,6 +22,7 @@ import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { getTitleKeyByPath } from "@/lib/navigation";
 import { useAuthStore } from "@/stores/auth-store";
 import { useTranslation } from "@/lib/i18n/use-translation";
+import { useRoleLabel } from "@/hooks/use-role-label";
 
 /** Görünen isimden baş harfleri üretir (avatar fallback). */
 function getInitials(name: string): string {
@@ -41,6 +42,7 @@ export function AppHeader() {
   const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation();
+  const roleLabel = useRoleLabel();
   const [mobileOpen, setMobileOpen] = useState(false);
   const titleKey = getTitleKeyByPath(pathname);
   const title = titleKey ? t(titleKey) : "FlowForge";
@@ -100,7 +102,7 @@ export function AppHeader() {
             <span>{user?.displayName ?? "—"}</span>
             {user && (
               <Badge variant="secondary" className="w-fit text-xs font-normal">
-                {t(`role.${user.role}`)}
+                {roleLabel(user.role)}
               </Badge>
             )}
           </DropdownMenuLabel>

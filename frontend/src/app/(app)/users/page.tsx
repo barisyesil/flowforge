@@ -13,6 +13,7 @@ import { UserFormSheet } from "@/components/users/user-form-sheet";
 import { useUsersStore } from "@/stores/users-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { useTranslation } from "@/lib/i18n/use-translation";
+import { useRoleLabel } from "@/hooks/use-role-label";
 import type { User } from "@/types/auth";
 
 function initials(name: string): string {
@@ -31,6 +32,7 @@ function UsersContent() {
   const loadUsers = useUsersStore((s) => s.loadUsers);
   const deleteUser = useUsersStore((s) => s.deleteUser);
   const currentUser = useAuthStore((s) => s.user);
+  const roleLabel = useRoleLabel();
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<User | null>(null);
@@ -104,7 +106,7 @@ function UsersContent() {
                   </p>
                 </div>
                 <Badge variant="secondary" className="font-normal">
-                  {t(`role.${user.role}`)}
+                  {roleLabel(user.role)}
                 </Badge>
                 <Button
                   variant="ghost"
