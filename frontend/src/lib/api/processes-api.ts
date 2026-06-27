@@ -1,16 +1,12 @@
 import { uid } from "@/lib/id";
-import { nextStatus } from "@/lib/process-machine";
-import type {
-  ProcessInstance,
-  ProcessAction,
-  ProcessEvent,
-} from "@/types/process";
-import type { FormDefinition, FormSubmission } from "@/types/form";
+import { stepById, mergeData, resolveTransition } from "@/lib/workflow-engine";
+import type { ProcessInstance, ProcessEvent } from "@/types/process";
+import type { WorkflowDefinition } from "@/types/workflow";
+import type { FormSubmission } from "@/types/form";
 
 /**
- * Mock süreç API'si — gerçek backend varmış gibi davranır. State machine
- * geçişleri ve geçmiş (log) burada yönetilir; backend bağlanınca bu dosya
- * fetch çağrılarıyla değiştirilecek.
+ * Süreç (çalışan workflow örneği) mock API'si. Başlatma ve aksiyon uygulama
+ * workflow-engine ile yürütülür; her geçiş loglanır. localStorage tabanlı.
  */
 
 const STORAGE_KEY = "flowforge-processes";
@@ -42,32 +38,31 @@ export const processesApi = {
     return delay(read().find((p) => p.id === id));
   },
 
-  /** Yeni süreç başlatır: ilk durum "Beklemede" ve bir "start" olayı eklenir. */
+  /** Workflow snapshot'ı ile yeni süreç başlatır; ilk adımı aktif yapar. */
   async start(
-    form: FormDefinition,
-    data: FormSubmission,
+    workflow: WorkflowDefinition,
     actorName: string,
   ): Promise<ProcessInstance> {
     const now = new Date().toISOString();
-    const startEvent: ProcessEvent = {
-      id: uid("evt"),
-      at: now,
-      actorName,
-      action: "start",
-      fromStatus: null,
-      toStatus: "pending",
-    };
+    const startStep = stepById(workflow, workflow.startStepId);
     const process: ProcessInstance = {
       id: uid("proc"),
-      formId: form.id,
-      formName: form.name,
-      formVersion: form.version,
-      data,
-      status: "pending",
+      workflow,
+      currentStepId: workflow.startStepId,
+      status: "in_progress",
+      data: {},
       startedByName: actorName,
       createdAt: now,
       updatedAt: now,
-      history: [startEvent],
+      history: [
+        {
+          id: uid("evt"),
+          at: now,
+          actorName,
+          stepName: startStep?.name ?? "—",
+          action: "start",
+        },
+      ],
     };
     const processes = read();
     processes.push(process);
@@ -75,35 +70,70 @@ export const processesApi = {
     return delay(process);
   },
 
-  /** Sürece bir aksiyon uygular; geçiş geçersizse hata fırlatır. */
+  /**
+   * Aktif adıma form verisi + aksiyon uygular; motoru çalıştırıp hedefe ilerler
+   * (sonraki adım veya bitiş). Geçersiz aksiyonda hata fırlatır.
+   */
   async applyAction(
-    id: string,
-    action: ProcessAction,
+    processId: string,
+    action: string,
+    stepData: FormSubmission,
     actorName: string,
   ): Promise<ProcessInstance> {
     const processes = read();
-    const index = processes.findIndex((p) => p.id === id);
-    if (index === -1) throw new Error("Süreç bulunamadı.");
+    const index = processes.findIndex((p) => p.id === processId);
+    if (index === -1) throw new Error("not-found");
 
     const process = processes[index];
-    const to = nextStatus(process.status, action);
-    if (!to) throw new Error("Bu durumda bu aksiyon uygulanamaz.");
+    if (process.status !== "in_progress" || !process.currentStepId) {
+      throw new Error("not-active");
+    }
+    const step = stepById(process.workflow, process.currentStepId);
+    if (!step) throw new Error("step-not-found");
+
+    const newData = { ...process.data, [step.id]: stepData };
+    const target = resolveTransition(step, action, mergeData(newData));
+    if (!target) throw new Error("no-transition");
 
     const now = new Date().toISOString();
-    const event: ProcessEvent = {
-      id: uid("evt"),
-      at: now,
-      actorName,
-      action,
-      fromStatus: process.status,
-      toStatus: to,
-    };
-    const updated: ProcessInstance = {
-      ...process,
-      status: to,
-      updatedAt: now,
-      history: [...process.history, event],
-    };
+    let updated: ProcessInstance;
+
+    if (target.type === "end") {
+      const event: ProcessEvent = {
+        id: uid("evt"),
+        at: now,
+        actorName,
+        stepName: step.name,
+        action,
+        outcome: target.outcome,
+      };
+      updated = {
+        ...process,
+        data: newData,
+        status: target.outcome,
+        currentStepId: null,
+        updatedAt: now,
+        history: [...process.history, event],
+      };
+    } else {
+      const nextStep = stepById(process.workflow, target.stepId);
+      const event: ProcessEvent = {
+        id: uid("evt"),
+        at: now,
+        actorName,
+        stepName: step.name,
+        action,
+        toStepName: nextStep?.name,
+      };
+      updated = {
+        ...process,
+        data: newData,
+        currentStepId: target.stepId,
+        updatedAt: now,
+        history: [...process.history, event],
+      };
+    }
+
     processes[index] = updated;
     write(processes);
     return delay(updated);

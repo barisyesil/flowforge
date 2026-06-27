@@ -7,12 +7,13 @@ import { Plus, Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/process/status-badge";
 import { useProcessesStore } from "@/stores/processes-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { useTranslation } from "@/lib/i18n/use-translation";
-import { availableActions, canRoleAct } from "@/lib/process-machine";
+import { stepById, isMyTask } from "@/lib/workflow-engine";
 import type { ProcessInstance } from "@/types/process";
 
 type Tab = "all" | "mine";
@@ -30,17 +31,23 @@ export default function ProcessesPage() {
     loadProcesses();
   }, [loadProcesses]);
 
-  /** "İşlerim": rolümün işlem yapabileceği, beklemedeki/devam eden süreçler. */
-  function needsMyAction(p: ProcessInstance): boolean {
-    if (!user) return false;
-    return availableActions(p.status).some((a) => canRoleAct(user.role, a));
+  /** Sürecin aktif adımı bana mı atanmış? (İşlerim) */
+  function isMine(p: ProcessInstance): boolean {
+    if (!user || p.status !== "in_progress" || !p.currentStepId) return false;
+    const step = stepById(p.workflow, p.currentStepId);
+    return step ? isMyTask(step, user) : false;
+  }
+
+  function currentStepName(p: ProcessInstance): string | null {
+    if (p.status !== "in_progress" || !p.currentStepId) return null;
+    return stepById(p.workflow, p.currentStepId)?.name ?? null;
   }
 
   const sorted = [...processes].sort((a, b) =>
     b.createdAt.localeCompare(a.createdAt),
   );
-  const visible = tab === "mine" ? sorted.filter(needsMyAction) : sorted;
-  const myCount = sorted.filter(needsMyAction).length;
+  const visible = tab === "mine" ? sorted.filter(isMine) : sorted;
+  const myCount = sorted.filter(isMine).length;
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "all", label: t("processes.all") },
@@ -51,19 +58,19 @@ export default function ProcessesPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="inline-flex rounded-lg border bg-muted/40 p-0.5">
-          {tabs.map((t) => (
+          {tabs.map((tabItem) => (
             <button
-              key={t.key}
+              key={tabItem.key}
               type="button"
-              onClick={() => setTab(t.key)}
+              onClick={() => setTab(tabItem.key)}
               className={cn(
                 "rounded-md px-3 py-1 text-sm font-medium transition-colors",
-                tab === t.key
+                tab === tabItem.key
                   ? "bg-background shadow-sm"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
-              {t.label}
+              {tabItem.label}
             </button>
           ))}
         </div>
@@ -91,30 +98,38 @@ export default function ProcessesPage() {
               {tab === "mine" ? t("processes.mineEmpty") : t("processes.empty")}
             </CardTitle>
             <CardDescription>
-              {tab === "mine"
-                ? t("processes.mineEmptyHint")
-                : t("processes.emptyHint")}
+              {tab === "mine" ? t("task.subtitle") : t("processes.emptyHint")}
             </CardDescription>
           </CardHeader>
         </Card>
       ) : (
         <div className="space-y-2">
-          {visible.map((process) => (
-            <Link
-              key={process.id}
-              href={`/processes/${process.id}`}
-              className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted/50"
-            >
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{process.formName}</p>
-                <p className="text-xs text-muted-foreground">
-                  {process.startedByName} ·{" "}
-                  {new Date(process.createdAt).toLocaleString("tr-TR")}
-                </p>
-              </div>
-              <StatusBadge status={process.status} />
-            </Link>
-          ))}
+          {visible.map((process) => {
+            const stepName = currentStepName(process);
+            return (
+              <Link
+                key={process.id}
+                href={`/processes/${process.id}`}
+                className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-muted/50"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">
+                    {process.workflow.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {process.startedByName} ·{" "}
+                    {new Date(process.createdAt).toLocaleString()}
+                  </p>
+                </div>
+                {stepName && (
+                  <Badge variant="outline" className="hidden font-normal sm:inline-flex">
+                    {stepName}
+                  </Badge>
+                )}
+                <StatusBadge status={process.status} />
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

@@ -276,6 +276,26 @@ const tr = {
   "wf.if": "Eğer",
   "wf.fieldPlaceholder": "alan",
   "wf.valuePlaceholder": "değer",
+
+  // Süreç başlatma + yürütme
+  "start.pickWorkflow": "Başlatmak için bir süreç seçin.",
+  "start.noWorkflows": "Henüz süreç tanımı yok",
+  "start.noWorkflowsHint": "Süreç başlatmak için önce bir süreç tasarlamalısınız.",
+  "start.goToDesign": "Süreç Tasarımına Git",
+  "start.started": "Süreç başlatıldı.",
+  "detail.workflow": "Süreç",
+  "detail.currentStep": "Mevcut adım",
+  "detail.steps": "Adımlar",
+  "detail.assignee": "Atanan",
+  "detail.yourTask": "Bu adım size atandı",
+  "detail.stepData": "{step} — veri",
+  "detail.noData": "(Veri girilmedi)",
+  "detail.movedTo": "ilerletti → {step}",
+  "detail.ended": "süreci sonuçlandırdı",
+  "detail.finished": "Bu süreç sonuçlandı.",
+  "detail.unassigned": "(Atanmamış)",
+  "step.noForm": "Bu adımda doldurulacak form yok.",
+  "task.subtitle": "Size atanmış, işlem bekleyen adımlar.",
 } as const;
 
 export type TranslationKey = keyof typeof tr;
@@ -527,6 +547,25 @@ const en: Record<TranslationKey, string> = {
   "wf.if": "If",
   "wf.fieldPlaceholder": "field",
   "wf.valuePlaceholder": "value",
+
+  "start.pickWorkflow": "Select a process to start.",
+  "start.noWorkflows": "No process definitions yet",
+  "start.noWorkflowsHint": "You must design a process before starting one.",
+  "start.goToDesign": "Go to Process Design",
+  "start.started": "Process started.",
+  "detail.workflow": "Process",
+  "detail.currentStep": "Current step",
+  "detail.steps": "Steps",
+  "detail.assignee": "Assignee",
+  "detail.yourTask": "This step is assigned to you",
+  "detail.stepData": "{step} — data",
+  "detail.noData": "(No data entered)",
+  "detail.movedTo": "advanced → {step}",
+  "detail.ended": "finalized the process",
+  "detail.finished": "This process has finished.",
+  "detail.unassigned": "(Unassigned)",
+  "step.noForm": "This step has no form to fill.",
+  "task.subtitle": "Steps assigned to you awaiting action.",
 };
 
 export const dictionaries: Record<Language, Record<TranslationKey, string>> = {

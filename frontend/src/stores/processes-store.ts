@@ -1,64 +1,65 @@
 import { create } from "zustand";
 
 import { processesApi } from "@/lib/api/processes-api";
-import type { ProcessInstance, ProcessAction } from "@/types/process";
-import type { FormDefinition, FormSubmission } from "@/types/form";
+import type { ProcessInstance } from "@/types/process";
+import type { WorkflowDefinition } from "@/types/workflow";
+import type { FormSubmission } from "@/types/form";
 import type { RequestStatus } from "@/stores/forms-store";
 
 type ProcessesState = {
   processes: ProcessInstance[];
   status: RequestStatus;
-  error: string | null;
 
   loadProcesses: () => Promise<void>;
   startProcess: (
-    form: FormDefinition,
-    data: FormSubmission,
+    workflow: WorkflowDefinition,
     actorName: string,
   ) => Promise<ProcessInstance | null>;
-  runAction: (
-    id: string,
-    action: ProcessAction,
+  applyAction: (
+    processId: string,
+    action: string,
+    stepData: FormSubmission,
     actorName: string,
   ) => Promise<ProcessInstance | null>;
 };
 
-/** Başlatılmış süreçlerin istemci tarafı durumu. */
 export const useProcessesStore = create<ProcessesState>((set) => ({
   processes: [],
   status: "idle",
-  error: null,
 
   loadProcesses: async () => {
-    set({ status: "loading", error: null });
+    set({ status: "loading" });
     try {
       const processes = await processesApi.list();
       set({ processes, status: "success" });
     } catch {
-      set({ status: "error", error: "Süreçler yüklenemedi." });
+      set({ status: "error" });
     }
   },
 
-  startProcess: async (form, data, actorName) => {
+  startProcess: async (workflow, actorName) => {
     try {
-      const created = await processesApi.start(form, data, actorName);
+      const created = await processesApi.start(workflow, actorName);
       set((s) => ({ processes: [...s.processes, created] }));
       return created;
     } catch {
-      set({ error: "Süreç başlatılamadı." });
       return null;
     }
   },
 
-  runAction: async (id, action, actorName) => {
+  applyAction: async (processId, action, stepData, actorName) => {
     try {
-      const updated = await processesApi.applyAction(id, action, actorName);
+      const updated = await processesApi.applyAction(
+        processId,
+        action,
+        stepData,
+        actorName,
+      );
       set((s) => ({
-        processes: s.processes.map((p) => (p.id === id ? updated : p)),
+        processes: s.processes.map((p) => (p.id === processId ? updated : p)),
       }));
       return updated;
     } catch {
-      set({ error: "Aksiyon uygulanamadı." });
       return null;
     }
   },

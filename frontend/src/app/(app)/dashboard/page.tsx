@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { Clock, Loader, CheckCircle2 } from "lucide-react";
+import { Loader, CheckCircle2, XCircle } from "lucide-react";
 
 import {
   Card,
@@ -29,9 +29,9 @@ export default function DashboardPage() {
     processes.filter((p) => p.status === status).length;
 
   const stats = [
-    { label: t("dashboard.pending"), value: countBy("pending"), icon: Clock },
-    { label: t("dashboard.inProgress"), value: countBy("in_progress"), icon: Loader },
-    { label: t("dashboard.completed"), value: countBy("completed"), icon: CheckCircle2 },
+    { label: t("status.in_progress"), value: countBy("in_progress"), icon: Loader },
+    { label: t("status.completed"), value: countBy("completed"), icon: CheckCircle2 },
+    { label: t("status.rejected"), value: countBy("rejected"), icon: XCircle },
   ];
 
   const recent = [...processes]
@@ -75,7 +75,7 @@ export default function DashboardPage() {
               >
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">
-                    {process.formName}
+                    {process.workflow.name}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {process.startedByName}

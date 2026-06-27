@@ -6,8 +6,6 @@ import { useTranslation } from "@/lib/i18n/use-translation";
 import type { ProcessStatus } from "@/types/process";
 
 const styles: Record<ProcessStatus, string> = {
-  pending:
-    "border-transparent bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400",
   in_progress:
     "border-transparent bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-400",
   completed:
