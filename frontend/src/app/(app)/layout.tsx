@@ -11,7 +11,7 @@ import { AuthGuard } from "@/components/auth/auth-guard";
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard>
-      <div className="flex h-full">
+      <div className="flex h-dvh overflow-hidden">
         {/* Masaüstü sabit sol menü */}
         <aside className="hidden w-64 shrink-0 border-r md:block">
           <SidebarContent />
