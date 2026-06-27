@@ -9,6 +9,8 @@ type AuthState = {
   hasHydrated: boolean;
   login: (user: User) => void;
   logout: () => void;
+  /** Aktif kullanıcının bilgilerini kısmi olarak günceller (profil düzenleme). */
+  updateUser: (patch: Partial<User>) => void;
   setHasHydrated: (value: boolean) => void;
 };
 
@@ -23,6 +25,10 @@ export const useAuthStore = create<AuthState>()(
       hasHydrated: false,
       login: (user) => set({ user }),
       logout: () => set({ user: null }),
+      updateUser: (patch) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, ...patch } : state.user,
+        })),
       setHasHydrated: (value) => set({ hasHydrated: value }),
     }),
     {
