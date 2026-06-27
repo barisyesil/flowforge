@@ -2,29 +2,32 @@ import {
   LayoutDashboard,
   FileText,
   Workflow,
+  Users,
   Settings,
   type LucideIcon,
 } from "lucide-react";
 
 import type { Role } from "@/types/auth";
+import type { TranslationKey } from "@/lib/i18n/dictionaries";
 
 /**
  * Uygulamanın sol menü yapısı. `roles` verilmişse öğe yalnızca o rollerde görünür
- * (rol bazlı gösterim bonusu). Verilmemişse tüm roller görür.
+ * (rol bazlı gösterim bonusu). Başlıklar çeviri anahtarıyla tutulur (i18n).
  */
 export type NavItem = {
-  title: string;
+  titleKey: TranslationKey;
   href: string;
   icon: LucideIcon;
   roles?: Role[];
 };
 
 export const mainNav: NavItem[] = [
-  { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { titleKey: "nav.dashboard", href: "/dashboard", icon: LayoutDashboard },
   // Form tasarımı yönetimsel bir iştir; yalnızca admin görür.
-  { title: "Form Tasarımı", href: "/forms", icon: FileText, roles: ["admin"] },
-  { title: "Süreçler / İşlerim", href: "/processes", icon: Workflow },
-  { title: "Ayarlar", href: "/settings", icon: Settings },
+  { titleKey: "nav.forms", href: "/forms", icon: FileText, roles: ["admin"] },
+  { titleKey: "nav.processes", href: "/processes", icon: Workflow },
+  { titleKey: "nav.users", href: "/users", icon: Users, roles: ["admin"] },
+  { titleKey: "nav.settings", href: "/settings", icon: Settings },
 ];
 
 /** Verilen role görünür menü öğelerini döndürür. */
@@ -34,10 +37,10 @@ export function navForRole(role: Role | undefined): NavItem[] {
   );
 }
 
-/** Aktif yola karşılık gelen sayfa başlığını döndürür (header'da kullanılır). */
-export function getTitleByPath(pathname: string): string {
+/** Aktif yola karşılık gelen sayfa başlığının çeviri anahtarı (yoksa null). */
+export function getTitleKeyByPath(pathname: string): TranslationKey | null {
   const match = mainNav.find(
     (item) => pathname === item.href || pathname.startsWith(item.href + "/"),
   );
-  return match?.title ?? "FlowForge";
+  return match?.titleKey ?? null;
 }

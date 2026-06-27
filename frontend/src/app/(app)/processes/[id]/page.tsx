@@ -13,12 +13,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/process/status-badge";
 import { useProcessesStore } from "@/stores/processes-store";
 import { useAuthStore } from "@/stores/auth-store";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import { availableActions, canRoleAct, isTerminal } from "@/lib/process-machine";
-import {
-  processActionLabels,
-  processStatusLabels,
-  type ProcessAction,
-} from "@/types/process";
+import type { ProcessAction } from "@/types/process";
 
 export default function ProcessDetailPage() {
   const params = useParams();
@@ -29,6 +26,7 @@ export default function ProcessDetailPage() {
   const loadProcesses = useProcessesStore((s) => s.loadProcesses);
   const runAction = useProcessesStore((s) => s.runAction);
   const user = useAuthStore((s) => s.user);
+  const { t } = useTranslation();
 
   const [acting, setActing] = useState<ProcessAction | null>(null);
 
@@ -45,10 +43,10 @@ export default function ProcessDetailPage() {
     return (
       <Card>
         <div className="space-y-3 p-6">
-          <p className="text-sm">Süreç bulunamadı.</p>
+          <p className="text-sm">{t("detail.notFound")}</p>
           <Button
             variant="outline"
-            render={<Link href="/processes">Süreçlere dön</Link>}
+            render={<Link href="/processes">{t("detail.backToList")}</Link>}
           />
         </div>
       </Card>
@@ -65,24 +63,29 @@ export default function ProcessDetailPage() {
     const updated = await runAction(process!.id, action, user.displayName);
     setActing(null);
     if (updated) {
-      toast.success(`İşlem uygulandı: ${processActionLabels[action]}`);
+      toast.success(
+        t("detail.actionApplied", { action: t(`action.${action}`) }),
+      );
     } else {
-      toast.error("İşlem uygulanamadı.");
+      toast.error(t("detail.actionFailed"));
     }
   }
 
   const meta = [
-    { label: "Başlatan", value: process.startedByName },
-    { label: "Süreç ID", value: process.id, mono: true },
+    { label: t("detail.startedBy"), value: process.startedByName },
+    { label: t("detail.processId"), value: process.id, mono: true },
     {
-      label: "Başlangıç",
-      value: new Date(process.createdAt).toLocaleString("tr-TR"),
+      label: t("detail.startDate"),
+      value: new Date(process.createdAt).toLocaleString(),
     },
     {
-      label: "Son güncelleme",
-      value: new Date(process.updatedAt).toLocaleString("tr-TR"),
+      label: t("detail.updatedDate"),
+      value: new Date(process.updatedAt).toLocaleString(),
     },
-    { label: "Form", value: `${process.formName} (v${process.formVersion})` },
+    {
+      label: t("detail.form"),
+      value: `${process.formName} (v${process.formVersion})`,
+    },
   ];
 
   return (
@@ -136,7 +139,7 @@ export default function ProcessDetailPage() {
                     {acting === action && (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     )}
-                    {processActionLabels[action]}
+                    {t(`action.${action}`)}
                   </Button>
                 ))}
               </div>
@@ -145,7 +148,7 @@ export default function ProcessDetailPage() {
 
           {actions.length === 0 && !isTerminal(process.status) && (
             <p className="text-xs text-muted-foreground">
-              Bu süreçte işlem yapma yetkiniz yok.
+              {t("detail.noPermission")}
             </p>
           )}
         </div>
@@ -154,7 +157,7 @@ export default function ProcessDetailPage() {
       {/* Form verisi (JSON) */}
       <Card>
         <div className="p-5">
-          <h3 className="mb-2 text-sm font-medium">Form Verisi (JSON)</h3>
+          <h3 className="mb-2 text-sm font-medium">{t("detail.formData")}</h3>
           <pre className="max-h-96 overflow-auto rounded-lg border bg-muted/50 p-4 text-xs">
             {JSON.stringify(process.data, null, 2)}
           </pre>
@@ -164,7 +167,7 @@ export default function ProcessDetailPage() {
       {/* Süreç geçmişi */}
       <Card>
         <div className="p-5">
-          <h3 className="mb-3 text-sm font-medium">Süreç Geçmişi</h3>
+          <h3 className="mb-3 text-sm font-medium">{t("detail.history")}</h3>
           <ol className="space-y-3">
             {[...process.history].reverse().map((ev) => (
               <li key={ev.id} className="flex gap-3 text-sm">
@@ -173,14 +176,14 @@ export default function ProcessDetailPage() {
                   <p>
                     <span className="font-medium">{ev.actorName}</span>{" "}
                     {ev.action === "start"
-                      ? "süreci başlattı"
-                      : processActionLabels[ev.action].toLowerCase() + "dı"}{" "}
+                      ? t("detail.started")
+                      : t(`action.${ev.action}`)}{" "}
                     <span className="text-muted-foreground">
-                      ({processStatusLabels[ev.toStatus]})
+                      ({t(`status.${ev.toStatus}`)})
                     </span>
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(ev.at).toLocaleString("tr-TR")}
+                    {new Date(ev.at).toLocaleString()}
                   </p>
                 </div>
               </li>

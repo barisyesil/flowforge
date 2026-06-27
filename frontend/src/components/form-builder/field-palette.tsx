@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { fieldTypeMetas } from "@/lib/form-fields";
 import { useFormBuilderStore } from "@/stores/form-builder-store";
+import { useTranslation } from "@/lib/i18n/use-translation";
 
 /**
  * Sol palet: tıklanınca canvas'a o tipte yeni alan ekler.
@@ -10,10 +11,11 @@ import { useFormBuilderStore } from "@/stores/form-builder-store";
  */
 export function FieldPalette() {
   const addField = useFormBuilderStore((s) => s.addField);
+  const { t } = useTranslation();
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-medium">Alan Ekle</h3>
+      <h3 className="text-sm font-medium">{t("builder.addField")}</h3>
       <div className="grid grid-cols-2 gap-2">
         {fieldTypeMetas.map((meta) => (
           <Button
@@ -23,7 +25,7 @@ export function FieldPalette() {
             onClick={() => addField(meta.type)}
           >
             <meta.icon className="h-4 w-4" />
-            <span className="text-xs font-normal">{meta.label}</span>
+            <span className="text-xs font-normal">{t(`field.${meta.type}`)}</span>
           </Button>
         ))}
       </div>

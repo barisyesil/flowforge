@@ -1,6 +1,9 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { processStatusLabels, type ProcessStatus } from "@/types/process";
+import { useTranslation } from "@/lib/i18n/use-translation";
+import type { ProcessStatus } from "@/types/process";
 
 const styles: Record<ProcessStatus, string> = {
   pending:
@@ -14,7 +17,6 @@ const styles: Record<ProcessStatus, string> = {
 };
 
 export function StatusBadge({ status }: { status: ProcessStatus }) {
-  return (
-    <Badge className={cn(styles[status])}>{processStatusLabels[status]}</Badge>
-  );
+  const { t } = useTranslation();
+  return <Badge className={cn(styles[status])}>{t(`status.${status}`)}</Badge>;
 }

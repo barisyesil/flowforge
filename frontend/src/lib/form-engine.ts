@@ -5,9 +5,16 @@ import type {
   FieldValue,
   RuleCondition,
 } from "@/types/form";
+import type { TranslationKey } from "@/lib/i18n/dictionaries";
 
-/** Alan adı (name) -> hata mesajı. */
-export type FieldErrors = Record<string, string>;
+/** Çevrilebilir hata: çeviri anahtarı + opsiyonel değişkenler. */
+export type FieldError = {
+  key: TranslationKey;
+  vars?: Record<string, string | number>;
+};
+
+/** Alan adı (name) -> hata. */
+export type FieldErrors = Record<string, FieldError>;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -97,12 +104,13 @@ export function validateForm(
 
     // Onay kutusu: zorunluysa işaretlenmeli.
     if (field.type === "checkbox") {
-      if (required && v !== true) errors[field.name] = "Bu alanı işaretlemelisiniz.";
+      if (required && v !== true)
+        errors[field.name] = { key: "validation.requiredCheck" };
       continue;
     }
 
     if (isEmpty(v)) {
-      if (required) errors[field.name] = "Bu alan zorunludur.";
+      if (required) errors[field.name] = { key: "validation.required" };
       continue;
     }
 
@@ -112,29 +120,35 @@ export function validateForm(
     if (field.type === "number") {
       const n = Number(v);
       if (Number.isNaN(n)) {
-        errors[field.name] = "Geçerli bir sayı girin.";
+        errors[field.name] = { key: "validation.number" };
       } else if (rules.min !== undefined && n < rules.min) {
-        errors[field.name] = `En az ${rules.min} olmalı.`;
+        errors[field.name] = { key: "validation.min", vars: { min: rules.min } };
       } else if (rules.max !== undefined && n > rules.max) {
-        errors[field.name] = `En fazla ${rules.max} olmalı.`;
+        errors[field.name] = { key: "validation.max", vars: { max: rules.max } };
       }
       continue;
     }
 
     if (field.type === "email" && !EMAIL_RE.test(text)) {
-      errors[field.name] = "Geçerli bir e-posta adresi girin.";
+      errors[field.name] = { key: "validation.email" };
       continue;
     }
 
     if (field.type === "text" || field.type === "textarea" || field.type === "email") {
       if (rules.minLength !== undefined && text.length < rules.minLength) {
-        errors[field.name] = `En az ${rules.minLength} karakter girin.`;
+        errors[field.name] = {
+          key: "validation.minLength",
+          vars: { min: rules.minLength },
+        };
       } else if (rules.maxLength !== undefined && text.length > rules.maxLength) {
-        errors[field.name] = `En fazla ${rules.maxLength} karakter girin.`;
+        errors[field.name] = {
+          key: "validation.maxLength",
+          vars: { max: rules.maxLength },
+        };
       } else if (rules.pattern) {
         try {
           if (!new RegExp(rules.pattern).test(text)) {
-            errors[field.name] = "Girdiğiniz değer beklenen biçimde değil.";
+            errors[field.name] = { key: "validation.pattern" };
           }
         } catch {
           /* geçersiz regex deseni yok sayılır */

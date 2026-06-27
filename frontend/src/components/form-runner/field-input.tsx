@@ -12,13 +12,15 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { useTranslation } from "@/lib/i18n/use-translation";
+import type { FieldError } from "@/lib/form-engine";
 import type { FormField, FieldValue } from "@/types/form";
 
 type Props = {
   field: FormField;
   value: FieldValue | undefined;
   required: boolean;
-  error?: string;
+  error?: FieldError;
   onChange: (value: FieldValue) => void;
 };
 
@@ -27,6 +29,7 @@ type Props = {
  * Form tanımındaki yapıya birebir bağlıdır — Adım 2 (Formu Başlat) bunu kullanır.
  */
 export function FieldInput({ field, value, required, error, onChange }: Props) {
+  const { t } = useTranslation();
   const requiredMark = required ? (
     <span className="text-destructive"> *</span>
   ) : null;
@@ -105,7 +108,9 @@ export function FieldInput({ field, value, required, error, onChange }: Props) {
             onValueChange={(v) => onChange(v as string)}
           >
             <SelectTrigger id={field.id} className="w-full" aria-invalid={!!error}>
-              <SelectValue placeholder={field.placeholder || "Seçiniz"} />
+              <SelectValue
+                placeholder={field.placeholder || t("runner.selectPlaceholder")}
+              />
             </SelectTrigger>
             <SelectContent>
               {options.map((o) => (
@@ -163,7 +168,9 @@ export function FieldInput({ field, value, required, error, onChange }: Props) {
       {field.helpText && !error && (
         <p className="text-xs text-muted-foreground">{field.helpText}</p>
       )}
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && (
+        <p className="text-xs text-destructive">{t(error.key, error.vars)}</p>
+      )}
     </div>
   );
 }

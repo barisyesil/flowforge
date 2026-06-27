@@ -12,19 +12,21 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { useFormBuilderStore } from "@/stores/form-builder-store";
+import { useTranslation } from "@/lib/i18n/use-translation";
+import type { TranslationKey } from "@/lib/i18n/dictionaries";
 import type { RuleOperator, RuleAction } from "@/types/form";
 
-const OPERATORS: { value: RuleOperator; label: string }[] = [
-  { value: "equals", label: "şuna eşitse" },
-  { value: "notEquals", label: "şuna eşit değilse" },
-  { value: "isChecked", label: "işaretliyse" },
-  { value: "isNotEmpty", label: "doluysa" },
+const OPERATORS: { value: RuleOperator; labelKey: TranslationKey }[] = [
+  { value: "equals", labelKey: "rules.op.equals" },
+  { value: "notEquals", labelKey: "rules.op.notEquals" },
+  { value: "isChecked", labelKey: "rules.op.isChecked" },
+  { value: "isNotEmpty", labelKey: "rules.op.isNotEmpty" },
 ];
 
-const ACTIONS: { value: RuleAction; label: string }[] = [
-  { value: "require", label: "zorunlu olur" },
-  { value: "show", label: "görünür olur" },
-  { value: "hide", label: "gizlenir" },
+const ACTIONS: { value: RuleAction; labelKey: TranslationKey }[] = [
+  { value: "require", labelKey: "rules.act.require" },
+  { value: "show", labelKey: "rules.act.show" },
+  { value: "hide", labelKey: "rules.act.hide" },
 ];
 
 /** Tekrarı azaltan küçük yardımcı select. */
@@ -68,15 +70,24 @@ export function RulesEditor() {
   const addRule = useFormBuilderStore((s) => s.addRule);
   const updateRule = useFormBuilderStore((s) => s.updateRule);
   const removeRule = useFormBuilderStore((s) => s.removeRule);
+  const { t } = useTranslation();
 
   const fieldOptions = fields.map((f) => ({ value: f.id, label: f.label }));
+  const operatorOptions = OPERATORS.map((o) => ({
+    value: o.value,
+    label: t(o.labelKey),
+  }));
+  const actionOptions = ACTIONS.map((a) => ({
+    value: a.value,
+    label: t(a.labelKey),
+  }));
 
   return (
     <div className="rounded-xl border bg-card p-4">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <GitBranch className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-sm font-medium">Kurallar (koşullu mantık)</h3>
+          <h3 className="text-sm font-medium">{t("rules.title")}</h3>
         </div>
         <Button
           variant="outline"
@@ -85,19 +96,14 @@ export function RulesEditor() {
           disabled={fields.length === 0}
         >
           <Plus className="h-4 w-4" />
-          Kural Ekle
+          {t("rules.add")}
         </Button>
       </div>
 
       {fields.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Kural eklemek için önce alan ekleyin.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("rules.needField")}</p>
       ) : rules.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Henüz kural yok. Örnek: &quot;Eğer A alanı &apos;Evet&apos; ise B alanı
-          zorunlu olur&quot;.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("rules.empty")}</p>
       ) : (
         <div className="space-y-3">
           {rules.map((rule) => {
@@ -112,7 +118,7 @@ export function RulesEditor() {
                 key={rule.id}
                 className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/30 p-3 text-sm"
               >
-                <span className="text-muted-foreground">Eğer</span>
+                <span className="text-muted-foreground">{t("rules.if")}</span>
 
                 {/* Kaynak alan */}
                 <SimpleSelect
@@ -124,7 +130,7 @@ export function RulesEditor() {
                     })
                   }
                   options={fieldOptions}
-                  placeholder="alan"
+                  placeholder={t("rules.field")}
                 />
 
                 {/* Operatör */}
@@ -136,7 +142,7 @@ export function RulesEditor() {
                       when: { ...rule.when, operator: v as RuleOperator },
                     })
                   }
-                  options={OPERATORS}
+                  options={operatorOptions}
                 />
 
                 {/* Değer (yalnızca eşitlik operatörlerinde) */}
@@ -154,13 +160,13 @@ export function RulesEditor() {
                         value: o.value,
                         label: o.label,
                       }))}
-                      placeholder="değer"
+                      placeholder={t("rules.value")}
                     />
                   ) : (
                     <Input
                       className="h-8 w-36"
                       value={String(rule.when.value ?? "")}
-                      placeholder="değer"
+                      placeholder={t("rules.value")}
                       onChange={(e) =>
                         updateRule(rule.id, {
                           when: { ...rule.when, value: e.target.value },
@@ -169,7 +175,7 @@ export function RulesEditor() {
                     />
                   ))}
 
-                <span className="text-muted-foreground">ise</span>
+                <span className="text-muted-foreground">{t("rules.then")}</span>
 
                 {/* Hedef alan */}
                 <SimpleSelect
@@ -179,7 +185,7 @@ export function RulesEditor() {
                     updateRule(rule.id, { targetFieldId: v })
                   }
                   options={fieldOptions}
-                  placeholder="hedef alan"
+                  placeholder={t("rules.target")}
                 />
 
                 {/* Aksiyon */}
@@ -189,7 +195,7 @@ export function RulesEditor() {
                   onValueChange={(v) =>
                     updateRule(rule.id, { action: v as RuleAction })
                   }
-                  options={ACTIONS}
+                  options={actionOptions}
                 />
 
                 <Button
@@ -199,7 +205,7 @@ export function RulesEditor() {
                   onClick={() => removeRule(rule.id)}
                 >
                   <Trash2 className="h-4 w-4 text-destructive" />
-                  <span className="sr-only">Kuralı sil</span>
+                  <span className="sr-only">{t("rules.delete")}</span>
                 </Button>
               </div>
             );

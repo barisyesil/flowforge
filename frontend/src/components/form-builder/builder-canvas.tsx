@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { fieldTypeMap } from "@/lib/form-fields";
 import { useFormBuilderStore } from "@/stores/form-builder-store";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import type { FormField } from "@/types/form";
 
 /** Tek bir sürüklenebilir alan satırı. */
@@ -39,6 +40,7 @@ function SortableFieldRow({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: field.id });
   const meta = fieldTypeMap[field.type];
+  const { t } = useTranslation();
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -65,7 +67,7 @@ function SortableFieldRow({
         {...listeners}
       >
         <GripVertical className="h-4 w-4" />
-        <span className="sr-only">Sürükleyerek sırala</span>
+        <span className="sr-only">{t("builder.dragReorder")}</span>
       </button>
 
       <meta.icon className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -80,7 +82,7 @@ function SortableFieldRow({
           )}
         </div>
         <span className="text-xs text-muted-foreground">
-          {meta.label} · {field.name}
+          {t(`field.${field.type}`)} · {field.name}
         </span>
       </div>
 
@@ -94,7 +96,7 @@ function SortableFieldRow({
         }}
       >
         <Trash2 className="h-4 w-4 text-destructive" />
-        <span className="sr-only">Sil</span>
+        <span className="sr-only">{t("builder.delete")}</span>
       </Button>
     </div>
   );
@@ -110,6 +112,7 @@ export function BuilderCanvas() {
   const selectField = useFormBuilderStore((s) => s.selectField);
   const removeField = useFormBuilderStore((s) => s.removeField);
   const reorderFields = useFormBuilderStore((s) => s.reorderFields);
+  const { t } = useTranslation();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -127,9 +130,7 @@ export function BuilderCanvas() {
     return (
       <div className="flex h-full min-h-64 flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-center text-muted-foreground">
         <MousePointerClick className="h-6 w-6" />
-        <p className="text-sm">
-          Soldaki paletten alan ekleyerek formunuzu tasarlamaya başlayın.
-        </p>
+        <p className="text-sm">{t("builder.emptyCanvas")}</p>
       </div>
     );
   }

@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/process/status-badge";
 import { useProcessesStore } from "@/stores/processes-store";
 import { useAuthStore } from "@/stores/auth-store";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import { availableActions, canRoleAct } from "@/lib/process-machine";
 import type { ProcessInstance } from "@/types/process";
 
@@ -21,6 +22,7 @@ export default function ProcessesPage() {
   const status = useProcessesStore((s) => s.status);
   const loadProcesses = useProcessesStore((s) => s.loadProcesses);
   const user = useAuthStore((s) => s.user);
+  const { t } = useTranslation();
 
   const [tab, setTab] = useState<Tab>("all");
 
@@ -41,8 +43,8 @@ export default function ProcessesPage() {
   const myCount = sorted.filter(needsMyAction).length;
 
   const tabs: { key: Tab; label: string }[] = [
-    { key: "all", label: "Tüm Süreçler" },
-    { key: "mine", label: `İşlerim${myCount ? ` (${myCount})` : ""}` },
+    { key: "all", label: t("processes.all") },
+    { key: "mine", label: `${t("processes.mine")}${myCount ? ` (${myCount})` : ""}` },
   ];
 
   return (
@@ -70,7 +72,7 @@ export default function ProcessesPage() {
           render={
             <Link href="/processes/new">
               <Plus className="h-4 w-4" />
-              Yeni Süreç Başlat
+              {t("processes.new")}
             </Link>
           }
         />
@@ -86,12 +88,12 @@ export default function ProcessesPage() {
           <CardHeader className="items-center text-center">
             <Inbox className="mb-1 h-6 w-6 text-muted-foreground" />
             <CardTitle className="text-base">
-              {tab === "mine" ? "Bekleyen işiniz yok" : "Henüz süreç yok"}
+              {tab === "mine" ? t("processes.mineEmpty") : t("processes.empty")}
             </CardTitle>
             <CardDescription>
               {tab === "mine"
-                ? "Size atanmış, işlem bekleyen süreç bulunmuyor."
-                : "“Yeni Süreç Başlat” ile bir form üzerinden süreç başlatın."}
+                ? t("processes.mineEmptyHint")
+                : t("processes.emptyHint")}
             </CardDescription>
           </CardHeader>
         </Card>

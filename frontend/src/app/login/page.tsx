@@ -17,11 +17,12 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { useAuthStore } from "@/stores/auth-store";
-import { authenticate, demoCredentials } from "@/lib/mock-users";
-import { roleLabels } from "@/types/auth";
+import { authenticate, demoCredentials } from "@/lib/api/users-api";
+import { useTranslation } from "@/lib/i18n/use-translation";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const login = useAuthStore((s) => s.login);
   const user = useAuthStore((s) => s.user);
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
@@ -43,12 +44,12 @@ export default function LoginPage() {
 
     const authed = authenticate(username.trim(), password);
     if (!authed) {
-      setError("Kullanıcı adı veya şifre hatalı.");
+      setError(t("login.error"));
       return;
     }
 
     login(authed);
-    toast.success(`Hoş geldiniz, ${authed.displayName}`);
+    toast.success(t("login.welcome", { name: authed.displayName }));
     router.replace("/dashboard");
   }
 
@@ -67,16 +68,14 @@ export default function LoginPage() {
           </div>
           <div>
             <CardTitle className="text-xl">FlowForge</CardTitle>
-            <CardDescription>
-              Devam etmek için hesabınıza giriş yapın
-            </CardDescription>
+            <CardDescription>{t("login.subtitle")}</CardDescription>
           </div>
         </CardHeader>
 
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Kullanıcı Adı</Label>
+              <Label htmlFor="username">{t("login.username")}</Label>
               <Input
                 id="username"
                 value={username}
@@ -88,7 +87,7 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Şifre</Label>
+              <Label htmlFor="password">{t("login.password")}</Label>
               <Input
                 id="password"
                 type="password"
@@ -106,15 +105,13 @@ export default function LoginPage() {
             )}
 
             <Button type="submit" className="w-full">
-              Giriş Yap
+              {t("login.submit")}
             </Button>
           </CardContent>
         </form>
 
         <CardFooter className="flex-col items-stretch gap-2 border-t pt-4">
-          <p className="text-xs text-muted-foreground">
-            Demo hesapları (tıklayarak doldurun):
-          </p>
+          <p className="text-xs text-muted-foreground">{t("login.demoHint")}</p>
           <div className="flex flex-col gap-1.5">
             {demoCredentials.map((c) => (
               <button
@@ -127,7 +124,7 @@ export default function LoginPage() {
                   {c.username} / {c.password}
                 </span>
                 <Badge variant="secondary" className="font-normal">
-                  {roleLabels[c.role]}
+                  {t(`role.${c.role}`)}
                 </Badge>
               </button>
             ))}

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { fieldTypeMap } from "@/lib/form-fields";
 import { useFormBuilderStore } from "@/stores/form-builder-store";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import type { FieldValidation } from "@/types/form";
 
 export function FieldProperties() {
@@ -19,14 +20,13 @@ export function FieldProperties() {
   const addOption = useFormBuilderStore((s) => s.addOption);
   const updateOption = useFormBuilderStore((s) => s.updateOption);
   const removeOption = useFormBuilderStore((s) => s.removeOption);
+  const { t } = useTranslation();
 
   if (!field) {
     return (
       <div className="flex h-full min-h-48 flex-col items-center justify-center gap-2 text-center text-muted-foreground">
         <SlidersHorizontal className="h-5 w-5" />
-        <p className="text-sm">
-          Özelliklerini düzenlemek için bir alan seçin.
-        </p>
+        <p className="text-sm">{t("props.selectField")}</p>
       </div>
     );
   }
@@ -47,13 +47,15 @@ export function FieldProperties() {
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-xs text-muted-foreground">{meta.label} alanı</p>
-        <h3 className="text-sm font-medium">Özellikler</h3>
+        <p className="text-xs text-muted-foreground">
+          {t("props.fieldOf", { type: t(`field.${field.type}`) })}
+        </p>
+        <h3 className="text-sm font-medium">{t("props.title")}</h3>
       </div>
 
       {/* Etiket */}
       <div className="space-y-1.5">
-        <Label htmlFor="prop-label">Etiket</Label>
+        <Label htmlFor="prop-label">{t("props.label")}</Label>
         <Input
           id="prop-label"
           value={field.label}
@@ -63,7 +65,7 @@ export function FieldProperties() {
 
       {/* Makine adı */}
       <div className="space-y-1.5">
-        <Label htmlFor="prop-name">Alan Adı (JSON anahtarı)</Label>
+        <Label htmlFor="prop-name">{t("props.name")}</Label>
         <Input
           id="prop-name"
           value={field.name}
@@ -74,7 +76,7 @@ export function FieldProperties() {
 
       {/* Zorunlu */}
       <div className="flex items-center justify-between">
-        <Label htmlFor="prop-required">Zorunlu alan</Label>
+        <Label htmlFor="prop-required">{t("props.required")}</Label>
         <Switch
           id="prop-required"
           checked={field.required}
@@ -87,7 +89,7 @@ export function FieldProperties() {
       {/* Placeholder */}
       {field.type !== "checkbox" && field.type !== "radio" && (
         <div className="space-y-1.5">
-          <Label htmlFor="prop-placeholder">Placeholder</Label>
+          <Label htmlFor="prop-placeholder">{t("props.placeholder")}</Label>
           <Input
             id="prop-placeholder"
             value={field.placeholder ?? ""}
@@ -100,7 +102,7 @@ export function FieldProperties() {
 
       {/* Yardım metni */}
       <div className="space-y-1.5">
-        <Label htmlFor="prop-help">Açıklama (yardım metni)</Label>
+        <Label htmlFor="prop-help">{t("props.helpText")}</Label>
         <Input
           id="prop-help"
           value={field.helpText ?? ""}
@@ -114,39 +116,39 @@ export function FieldProperties() {
           <Separator />
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>Seçenekler</Label>
+              <Label>{t("props.options")}</Label>
               <Button
                 variant="outline"
                 size="xs"
                 onClick={() => addOption(field.id)}
               >
                 <Plus className="h-3.5 w-3.5" />
-                Ekle
+                {t("common.add")}
               </Button>
             </div>
             <div className="space-y-2">
               {(field.options ?? []).map((option) => (
                 <div key={option.id} className="flex items-center gap-1.5">
                   <Input
-                    aria-label="Seçenek etiketi"
+                    aria-label={t("props.optionLabel")}
                     value={option.label}
                     onChange={(e) =>
                       updateOption(field.id, option.id, {
                         label: e.target.value,
                       })
                     }
-                    placeholder="Etiket"
+                    placeholder={t("props.optionLabel")}
                     className="h-8"
                   />
                   <Input
-                    aria-label="Seçenek değeri"
+                    aria-label={t("props.optionValue")}
                     value={option.value}
                     onChange={(e) =>
                       updateOption(field.id, option.id, {
                         value: e.target.value,
                       })
                     }
-                    placeholder="değer"
+                    placeholder={t("props.optionValue")}
                     className="h-8 w-28 font-mono text-xs"
                   />
                   <Button
@@ -168,13 +170,13 @@ export function FieldProperties() {
         <>
           <Separator />
           <div className="space-y-3">
-            <Label>Doğrulama</Label>
+            <Label>{t("props.validation")}</Label>
 
             {meta.hasTextValidation && (
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="prop-minlen" className="text-xs font-normal">
-                    Min. uzunluk
+                    {t("props.minLength")}
                   </Label>
                   <Input
                     id="prop-minlen"
@@ -188,7 +190,7 @@ export function FieldProperties() {
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="prop-maxlen" className="text-xs font-normal">
-                    Maks. uzunluk
+                    {t("props.maxLength")}
                   </Label>
                   <Input
                     id="prop-maxlen"
@@ -202,7 +204,7 @@ export function FieldProperties() {
                 </div>
                 <div className="col-span-2 space-y-1.5">
                   <Label htmlFor="prop-pattern" className="text-xs font-normal">
-                    Regex deseni (pattern)
+                    {t("props.pattern")}
                   </Label>
                   <Input
                     id="prop-pattern"
@@ -220,7 +222,7 @@ export function FieldProperties() {
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="prop-min" className="text-xs font-normal">
-                    Min. değer
+                    {t("props.minValue")}
                   </Label>
                   <Input
                     id="prop-min"
@@ -234,7 +236,7 @@ export function FieldProperties() {
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="prop-max" className="text-xs font-normal">
-                    Maks. değer
+                    {t("props.maxValue")}
                   </Label>
                   <Input
                     id="prop-max"

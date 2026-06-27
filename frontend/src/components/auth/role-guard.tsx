@@ -4,6 +4,7 @@ import { ShieldAlert } from "lucide-react";
 
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuthStore } from "@/stores/auth-store";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import type { Role } from "@/types/auth";
 
 /**
@@ -19,6 +20,7 @@ export function RoleGuard({
 }) {
   const user = useAuthStore((s) => s.user);
   const hasHydrated = useAuthStore((s) => s.hasHydrated);
+  const { t } = useTranslation();
 
   if (!hasHydrated) return null;
 
@@ -27,10 +29,8 @@ export function RoleGuard({
       <Card>
         <CardHeader className="items-center text-center">
           <ShieldAlert className="mb-1 h-6 w-6 text-muted-foreground" />
-          <CardTitle className="text-base">Erişim yetkiniz yok</CardTitle>
-          <CardDescription>
-            Bu sayfayı görüntülemek için gerekli role sahip değilsiniz.
-          </CardDescription>
+          <CardTitle className="text-base">{t("access.denied")}</CardTitle>
+          <CardDescription>{t("access.deniedHint")}</CardDescription>
         </CardHeader>
       </Card>
     );

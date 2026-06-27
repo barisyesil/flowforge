@@ -12,6 +12,7 @@ import {
   buildSubmission,
   type FieldErrors,
 } from "@/lib/form-engine";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import type { FormDefinition, FormSubmission, FieldValue } from "@/types/form";
 
 type SubmitStatus = "idle" | "submitting" | "success" | "error";
@@ -29,6 +30,7 @@ export function FormRunner({
   /** Doğrulama geçince çağrılır; hata fırlatırsa error state'e geçilir. */
   onSubmit: (data: FormSubmission) => Promise<void>;
 }) {
+  const { t } = useTranslation();
   const [values, setValues] = useState<FormSubmission>({});
   const [errors, setErrors] = useState<FieldErrors>({});
   const [status, setStatus] = useState<SubmitStatus>("idle");
@@ -49,7 +51,7 @@ export function FormRunner({
     const validationErrors = validateForm(form, values);
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) {
-      toast.error("Lütfen formdaki hataları düzeltin.");
+      toast.error(t("runner.fixErrors"));
       return;
     }
 
@@ -63,7 +65,7 @@ export function FormRunner({
       console.log("Form gönderimi (JSON):", payload);
     } catch {
       setStatus("error");
-      toast.error("Gönderim sırasında bir hata oluştu.");
+      toast.error(t("runner.submitError"));
     }
   }
 
@@ -79,11 +81,11 @@ export function FormRunner({
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-sm font-medium text-green-600 dark:text-green-500">
           <CheckCircle2 className="h-5 w-5" />
-          Form gönderildi
+          {t("runner.submitted")}
         </div>
         <div>
           <p className="mb-1.5 text-sm text-muted-foreground">
-            Girilen verinin JSON çıktısı:
+            {t("runner.jsonOutput")}
           </p>
           <pre className="max-h-96 overflow-auto rounded-lg border bg-muted/50 p-4 text-xs">
             {JSON.stringify(result, null, 2)}
@@ -91,7 +93,7 @@ export function FormRunner({
         </div>
         <Button variant="outline" onClick={resetRunner}>
           <RotateCcw className="h-4 w-4" />
-          Yeni gönderim
+          {t("runner.newSubmission")}
         </Button>
       </div>
     );
@@ -102,9 +104,7 @@ export function FormRunner({
   return (
     <form onSubmit={handleSubmit} className="max-w-xl space-y-5">
       {visibleFields.length === 0 && (
-        <p className="text-sm text-muted-foreground">
-          Bu formda gösterilecek alan yok.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("runner.noFields")}</p>
       )}
 
       {visibleFields.map((field) => (
@@ -123,7 +123,7 @@ export function FormRunner({
           {status === "submitting" && (
             <Loader2 className="h-4 w-4 animate-spin" />
           )}
-          Gönder
+          {t("common.submit")}
         </Button>
       )}
     </form>

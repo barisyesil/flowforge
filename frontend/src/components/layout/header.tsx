@@ -18,9 +18,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarContent } from "@/components/layout/sidebar";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { getTitleByPath } from "@/lib/navigation";
+import { LanguageSwitcher } from "@/components/i18n/language-switcher";
+import { getTitleKeyByPath } from "@/lib/navigation";
 import { useAuthStore } from "@/stores/auth-store";
-import { roleLabels } from "@/types/auth";
+import { useTranslation } from "@/lib/i18n/use-translation";
 
 /** Görünen isimden baş harfleri üretir (avatar fallback). */
 function getInitials(name: string): string {
@@ -39,8 +40,10 @@ function getInitials(name: string): string {
 export function AppHeader() {
   const pathname = usePathname();
   const router = useRouter();
+  const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const title = getTitleByPath(pathname);
+  const titleKey = getTitleKeyByPath(pathname);
+  const title = titleKey ? t(titleKey) : "FlowForge";
 
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
@@ -59,12 +62,12 @@ export function AppHeader() {
             render={
               <Button variant="ghost" size="icon" className="md:hidden">
                 <Menu className="h-5 w-5" />
-                <span className="sr-only">Menüyü aç</span>
+                <span className="sr-only">{t("header.openMenu")}</span>
               </Button>
             }
           />
           <SheetContent side="left" className="w-64 p-0">
-            <SheetTitle className="sr-only">Navigasyon</SheetTitle>
+            <SheetTitle className="sr-only">{t("header.navigation")}</SheetTitle>
             <SidebarContent onNavigate={() => setMobileOpen(false)} />
           </SheetContent>
         </Sheet>
@@ -73,6 +76,7 @@ export function AppHeader() {
       </div>
 
       <div className="flex items-center gap-1">
+        <LanguageSwitcher />
         <ThemeToggle />
 
         {/* Aktif kullanıcı */}
@@ -96,14 +100,14 @@ export function AppHeader() {
             <span>{user?.displayName ?? "—"}</span>
             {user && (
               <Badge variant="secondary" className="w-fit text-xs font-normal">
-                {roleLabels[user.role]}
+                {t(`role.${user.role}`)}
               </Badge>
             )}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="h-4 w-4" />
-              Çıkış Yap
+              {t("header.logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

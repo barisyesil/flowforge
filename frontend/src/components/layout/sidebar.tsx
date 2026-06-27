@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { navForRole } from "@/lib/navigation";
 import { useAuthStore } from "@/stores/auth-store";
+import { useTranslation } from "@/lib/i18n/use-translation";
 
 /**
  * Marka logosu + ana navigasyon. Hem masaüstü (sabit aside) hem mobil
@@ -15,6 +16,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
   const role = useAuthStore((s) => s.user?.role);
   const navItems = navForRole(role);
+  const { t } = useTranslation();
 
   return (
     <div className="flex h-full flex-col bg-sidebar">
@@ -44,14 +46,14 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               )}
             >
               <item.icon className="h-4 w-4 shrink-0" />
-              {item.title}
+              {t(item.titleKey)}
             </Link>
           );
         })}
       </nav>
 
       <div className="border-t p-4 text-xs text-muted-foreground">
-        Süreç & Form Yönetimi
+        {t("nav.tagline")}
       </div>
     </div>
   );

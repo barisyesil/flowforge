@@ -14,6 +14,7 @@ import { FormRunner } from "@/components/form-runner/form-runner";
 import { useFormsStore } from "@/stores/forms-store";
 import { useProcessesStore } from "@/stores/processes-store";
 import { useAuthStore } from "@/stores/auth-store";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import type { FormSubmission } from "@/types/form";
 
 export default function NewProcessPage() {
@@ -23,6 +24,7 @@ export default function NewProcessPage() {
   const loadForms = useFormsStore((s) => s.loadForms);
   const startProcess = useProcessesStore((s) => s.startProcess);
   const user = useAuthStore((s) => s.user);
+  const { t } = useTranslation();
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -36,7 +38,7 @@ export default function NewProcessPage() {
     if (!selected || !user) throw new Error("Eksik bağlam");
     const created = await startProcess(selected, payload, user.displayName);
     if (!created) throw new Error("Süreç başlatılamadı");
-    toast.success("Süreç başlatıldı.");
+    toast.success(t("newProcess.started"));
     router.push(`/processes/${created.id}`);
   }
 
@@ -55,13 +57,11 @@ export default function NewProcessPage() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Henüz form yok</CardTitle>
-          <CardDescription>
-            Süreç başlatmak için önce bir form tasarlamalısınız.
-          </CardDescription>
+          <CardTitle>{t("newProcess.noForms")}</CardTitle>
+          <CardDescription>{t("newProcess.noFormsHint")}</CardDescription>
         </CardHeader>
         <div className="px-6 pb-6">
-          <Button render={<Link href="/forms">Form Tasarımına Git</Link>} />
+          <Button render={<Link href="/forms">{t("newProcess.goToDesign")}</Link>} />
         </div>
       </Card>
     );
@@ -83,7 +83,8 @@ export default function NewProcessPage() {
           <div>
             <h2 className="text-sm font-semibold">{selected.name}</h2>
             <p className="text-xs text-muted-foreground">
-              {selected.fields.length} alan · v{selected.version}
+              {t("newProcess.fields", { count: selected.fields.length })} · v
+              {selected.version}
             </p>
           </div>
         </div>
@@ -99,9 +100,7 @@ export default function NewProcessPage() {
   // Form seçici
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        Süreç başlatmak için bir form seçin.
-      </p>
+      <p className="text-sm text-muted-foreground">{t("newProcess.pickForm")}</p>
       <div className="grid gap-3 sm:grid-cols-2">
         {forms.map((form) => (
           <button
@@ -116,7 +115,7 @@ export default function NewProcessPage() {
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{form.name}</p>
               <p className="text-xs text-muted-foreground">
-                {form.fields.length} alan
+                {t("newProcess.fields", { count: form.fields.length })}
               </p>
             </div>
             <Badge variant="secondary" className="font-normal">

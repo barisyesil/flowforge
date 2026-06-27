@@ -13,6 +13,7 @@ import { FieldProperties } from "@/components/form-builder/field-properties";
 import { RulesEditor } from "@/components/form-builder/rules-editor";
 import { useFormBuilderStore } from "@/stores/form-builder-store";
 import { useFormsStore } from "@/stores/forms-store";
+import { useTranslation } from "@/lib/i18n/use-translation";
 
 /**
  * Form Tasarla (Adım 1) ekranının kabuğu: üç panel.
@@ -25,25 +26,28 @@ export function FormBuilder() {
   const form = useFormBuilderStore((s) => s.form);
   const resetForm = useFormBuilderStore((s) => s.resetForm);
   const saveForm = useFormsStore((s) => s.saveForm);
+  const { t } = useTranslation();
 
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
     if (!form.name.trim()) {
-      toast.error("Form adı boş olamaz.");
+      toast.error(t("builder.nameRequired"));
       return;
     }
     if (form.fields.length === 0) {
-      toast.error("Kaydetmeden önce en az bir alan ekleyin.");
+      toast.error(t("builder.needField"));
       return;
     }
     setSaving(true);
     const saved = await saveForm(form);
     setSaving(false);
     if (saved) {
-      toast.success(`"${saved.name}" kaydedildi (v${saved.version}).`);
+      toast.success(
+        t("builder.saved", { name: saved.name, version: saved.version }),
+      );
     } else {
-      toast.error("Form kaydedilemedi.");
+      toast.error(t("builder.saveFailed"));
     }
   }
 
@@ -53,7 +57,7 @@ export function FormBuilder() {
       <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
         <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
           <div className="space-y-1.5">
-            <Label htmlFor="form-name">Form Adı</Label>
+            <Label htmlFor="form-name">{t("builder.formName")}</Label>
             <Input
               id="form-name"
               value={name}
@@ -62,14 +66,14 @@ export function FormBuilder() {
             />
           </div>
           <span className="pb-2 text-sm text-muted-foreground">
-            {fieldCount} alan
+            {t("builder.fields", { count: fieldCount })}
           </span>
         </div>
 
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={resetForm}>
             <FilePlus2 className="h-4 w-4" />
-            Yeni Form
+            {t("common.newForm")}
           </Button>
           <Button onClick={handleSave} disabled={saving}>
             {saving ? (
@@ -77,7 +81,7 @@ export function FormBuilder() {
             ) : (
               <Save className="h-4 w-4" />
             )}
-            Kaydet
+            {t("common.save")}
           </Button>
         </div>
       </div>

@@ -13,11 +13,13 @@ import {
 } from "@/components/ui/card";
 import { StatusBadge } from "@/components/process/status-badge";
 import { useProcessesStore } from "@/stores/processes-store";
+import { useTranslation } from "@/lib/i18n/use-translation";
 import type { ProcessStatus } from "@/types/process";
 
 export default function DashboardPage() {
   const processes = useProcessesStore((s) => s.processes);
   const loadProcesses = useProcessesStore((s) => s.loadProcesses);
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadProcesses();
@@ -27,9 +29,9 @@ export default function DashboardPage() {
     processes.filter((p) => p.status === status).length;
 
   const stats = [
-    { label: "Bekleyen İşler", value: countBy("pending"), icon: Clock },
-    { label: "Devam Eden İşler", value: countBy("in_progress"), icon: Loader },
-    { label: "Tamamlanan İşler", value: countBy("completed"), icon: CheckCircle2 },
+    { label: t("dashboard.pending"), value: countBy("pending"), icon: Clock },
+    { label: t("dashboard.inProgress"), value: countBy("in_progress"), icon: Loader },
+    { label: t("dashboard.completed"), value: countBy("completed"), icon: CheckCircle2 },
   ];
 
   const recent = [...processes]
@@ -38,9 +40,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm text-muted-foreground">
-        Süreçlerinizin genel durumu.
-      </p>
+      <p className="text-sm text-muted-foreground">{t("dashboard.overview")}</p>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat) => (
@@ -60,9 +60,9 @@ export default function DashboardPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Son Süreçler</CardTitle>
+          <CardTitle>{t("dashboard.recent")}</CardTitle>
           {recent.length === 0 && (
-            <CardDescription>Henüz süreç başlatılmadı.</CardDescription>
+            <CardDescription>{t("dashboard.noProcesses")}</CardDescription>
           )}
         </CardHeader>
         {recent.length > 0 && (
