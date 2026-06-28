@@ -1,49 +1,48 @@
 import { create } from "zustand";
 
-import {
-  createStep,
-  createTransition,
-  createEmptyWorkflow,
-} from "@/lib/workflow-factory";
+import { createStep, createTransition, createEmptyWorkflow } from "@/lib/workflow-factory";
 import type {
   WorkflowDefinition,
   WorkflowStep,
   Transition,
+  TransitionTarget,
 } from "@/types/workflow";
+
+type Selection = { stepId: string; transitionId: string };
 
 type WorkflowBuilderState = {
   workflow: WorkflowDefinition;
   selectedStepId: string | null;
+  selectedTransition: Selection | null;
   stepSeq: number;
 
   setName: (name: string) => void;
-  setDescription: (description: string) => void;
 
-  addStep: () => void;
+  // Adımlar
+  addStepAt: (position: { x: number; y: number }) => void;
   removeStep: (id: string) => void;
   updateStep: (id: string, patch: Partial<WorkflowStep>) => void;
-  selectStep: (id: string | null) => void;
-  reorderSteps: (activeId: string, overId: string) => void;
 
-  addTransition: (stepId: string) => void;
-  updateTransition: (
-    stepId: string,
-    transitionId: string,
-    patch: Partial<Transition>,
-  ) => void;
+  // Graph
+  setNodePosition: (nodeId: string, position: { x: number; y: number }) => void;
+  setStartStep: (stepId: string) => void;
+  connectTransition: (sourceStepId: string, target: TransitionTarget) => void;
+
+  // Geçişler
+  updateTransition: (stepId: string, transitionId: string, patch: Partial<Transition>) => void;
   removeTransition: (stepId: string, transitionId: string) => void;
+
+  // Seçim
+  selectStep: (id: string | null) => void;
+  selectTransition: (selection: Selection | null) => void;
+  clearSelection: () => void;
 
   loadWorkflow: (workflow: WorkflowDefinition) => void;
   resetWorkflow: () => void;
 };
 
-/** updatedAt'i güncel tutar ve başlangıç adımını ilk adıma sabitler. */
 function touch(workflow: WorkflowDefinition): WorkflowDefinition {
-  return {
-    ...workflow,
-    startStepId: workflow.steps[0]?.id ?? null,
-    updatedAt: new Date().toISOString(),
-  };
+  return { ...workflow, updatedAt: new Date().toISOString() };
 }
 
 function mapStep(
@@ -60,64 +59,73 @@ function mapStep(
 export const useWorkflowBuilderStore = create<WorkflowBuilderState>((set) => ({
   workflow: createEmptyWorkflow(),
   selectedStepId: null,
+  selectedTransition: null,
   stepSeq: 1,
 
   setName: (name) => set((s) => ({ workflow: touch({ ...s.workflow, name }) })),
-  setDescription: (description) =>
-    set((s) => ({ workflow: touch({ ...s.workflow, description }) })),
 
-  addStep: () =>
+  addStepAt: (position) =>
     set((s) => {
       const index = s.stepSeq + 1;
       const step = createStep(index);
+      const layout = { ...(s.workflow.layout ?? {}), [step.id]: position };
+      const firstStep = s.workflow.steps.length === 0;
       return {
         stepSeq: index,
         selectedStepId: step.id,
-        workflow: touch({ ...s.workflow, steps: [...s.workflow.steps, step] }),
+        selectedTransition: null,
+        workflow: touch({
+          ...s.workflow,
+          steps: [...s.workflow.steps, step],
+          layout,
+          startStepId: firstStep ? step.id : s.workflow.startStepId,
+        }),
       };
     }),
 
   removeStep: (id) =>
-    set((s) => ({
-      selectedStepId: s.selectedStepId === id ? null : s.selectedStepId,
-      workflow: touch({
-        ...s.workflow,
-        steps: s.workflow.steps
-          .filter((step) => step.id !== id)
-          // Silinen adıma giden geçişleri "tamamlandı" bitişine çevir.
-          .map((step) => ({
+    set((s) => {
+      const layout = { ...(s.workflow.layout ?? {}) };
+      delete layout[id];
+      const remaining = s.workflow.steps.filter((step) => step.id !== id);
+      return {
+        selectedStepId: s.selectedStepId === id ? null : s.selectedStepId,
+        workflow: touch({
+          ...s.workflow,
+          steps: remaining.map((step) => ({
             ...step,
-            transitions: step.transitions.map((tr) =>
-              tr.target.type === "step" && tr.target.stepId === id
-                ? { ...tr, target: { type: "end", outcome: "completed" } }
-                : tr,
+            transitions: step.transitions.filter(
+              (tr) => !(tr.target.type === "step" && tr.target.stepId === id),
             ),
           })),
-      }),
-    })),
+          layout,
+          startStepId:
+            s.workflow.startStepId === id
+              ? (remaining[0]?.id ?? null)
+              : s.workflow.startStepId,
+        }),
+      };
+    }),
 
   updateStep: (id, patch) =>
     set((s) => ({ workflow: mapStep(s.workflow, id, (step) => ({ ...step, ...patch })) })),
 
-  selectStep: (id) => set({ selectedStepId: id }),
-
-  reorderSteps: (activeId, overId) =>
-    set((s) => {
-      if (activeId === overId) return s;
-      const steps = [...s.workflow.steps];
-      const from = steps.findIndex((x) => x.id === activeId);
-      const to = steps.findIndex((x) => x.id === overId);
-      if (from === -1 || to === -1) return s;
-      const [moved] = steps.splice(from, 1);
-      steps.splice(to, 0, moved);
-      return { workflow: touch({ ...s.workflow, steps }) };
-    }),
-
-  addTransition: (stepId) =>
+  setNodePosition: (nodeId, position) =>
     set((s) => ({
-      workflow: mapStep(s.workflow, stepId, (step) => ({
+      workflow: {
+        ...s.workflow,
+        layout: { ...(s.workflow.layout ?? {}), [nodeId]: position },
+      },
+    })),
+
+  setStartStep: (stepId) =>
+    set((s) => ({ workflow: touch({ ...s.workflow, startStepId: stepId }) })),
+
+  connectTransition: (sourceStepId, target) =>
+    set((s) => ({
+      workflow: mapStep(s.workflow, sourceStepId, (step) => ({
         ...step,
-        transitions: [...step.transitions, createTransition()],
+        transitions: [...step.transitions, { ...createTransition(), target }],
       })),
     })),
 
@@ -133,19 +141,34 @@ export const useWorkflowBuilderStore = create<WorkflowBuilderState>((set) => ({
 
   removeTransition: (stepId, transitionId) =>
     set((s) => ({
+      selectedTransition:
+        s.selectedTransition?.transitionId === transitionId
+          ? null
+          : s.selectedTransition,
       workflow: mapStep(s.workflow, stepId, (step) => ({
         ...step,
         transitions: step.transitions.filter((tr) => tr.id !== transitionId),
       })),
     })),
 
+  selectStep: (id) => set({ selectedStepId: id, selectedTransition: null }),
+  selectTransition: (selection) =>
+    set({ selectedTransition: selection, selectedStepId: null }),
+  clearSelection: () => set({ selectedStepId: null, selectedTransition: null }),
+
   loadWorkflow: (workflow) =>
     set({
       workflow,
-      selectedStepId: workflow.steps[0]?.id ?? null,
+      selectedStepId: null,
+      selectedTransition: null,
       stepSeq: workflow.steps.length,
     }),
 
   resetWorkflow: () =>
-    set({ workflow: createEmptyWorkflow(), selectedStepId: null, stepSeq: 1 }),
+    set({
+      workflow: createEmptyWorkflow(),
+      selectedStepId: null,
+      selectedTransition: null,
+      stepSeq: 1,
+    }),
 }));

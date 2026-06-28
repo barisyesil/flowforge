@@ -1,4 +1,9 @@
 import { uid } from "@/lib/id";
+import {
+  START_NODE_ID,
+  END_COMPLETED_ID,
+  END_REJECTED_ID,
+} from "@/lib/workflow-graph";
 import type {
   WorkflowDefinition,
   WorkflowStep,
@@ -46,6 +51,12 @@ export function createEmptyWorkflow(): WorkflowDefinition {
     description: "",
     steps: [firstStep],
     startStepId: firstStep.id,
+    layout: {
+      [START_NODE_ID]: { x: 40, y: 200 },
+      [firstStep.id]: { x: 320, y: 190 },
+      [END_COMPLETED_ID]: { x: 660, y: 110 },
+      [END_REJECTED_ID]: { x: 660, y: 300 },
+    },
     version: 1,
     createdAt: now,
     updatedAt: now,

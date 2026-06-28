@@ -49,7 +49,10 @@ export type WorkflowDefinition = {
   steps: WorkflowStep[];
   /** Sürecin başlayacağı adım (genelde ilk adım). */
   startStepId: string | null;
+  /** Görsel tasarımcıdaki node konumları (node id -> {x,y}). */
+  layout?: Record<string, { x: number; y: number }>;
   version: number;
   createdAt: string;
   updatedAt: string;
 };
+

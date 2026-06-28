@@ -277,6 +277,12 @@ const tr = {
   "wf.if": "Eğer",
   "wf.fieldPlaceholder": "alan",
   "wf.valuePlaceholder": "değer",
+  "wf.start": "Başlangıç",
+  "wf.stepInspector": "Adım Özellikleri",
+  "wf.transitionInspector": "Geçiş Özellikleri",
+  "wf.selectHint": "Düzenlemek için bir adım veya bağlantı seçin. Adımı palet üzerinden sürükleyin, bağlamak için bir adımın sağ ucundan diğerine çekin.",
+  "wf.deleteTransition": "Geçişi sil",
+  "wf.canvasHint": "Sağdaki uçtan çekerek adımları bağlayın · Başlangıç → ilk adım",
 
   // Süreç başlatma + yürütme
   "start.pickWorkflow": "Başlatmak için bir süreç seçin.",
@@ -552,6 +558,12 @@ const en: Record<TranslationKey, string> = {
   "wf.if": "If",
   "wf.fieldPlaceholder": "field",
   "wf.valuePlaceholder": "value",
+  "wf.start": "Start",
+  "wf.stepInspector": "Step Properties",
+  "wf.transitionInspector": "Transition Properties",
+  "wf.selectHint": "Select a step or connection to edit. Drag a step from the palette; connect by dragging from a step's right handle to another.",
+  "wf.deleteTransition": "Delete transition",
+  "wf.canvasHint": "Connect steps by dragging from the right handle · Start → first step",
 
   "start.pickWorkflow": "Select a process to start.",
   "start.noWorkflows": "No process definitions yet",
