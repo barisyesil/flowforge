@@ -2,15 +2,23 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Save, FilePlus2, Loader2 } from "lucide-react";
+import { Save, FilePlus2, Loader2, Eye } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { FieldPalette } from "@/components/form-builder/field-palette";
 import { BuilderCanvas } from "@/components/form-builder/builder-canvas";
 import { FieldProperties } from "@/components/form-builder/field-properties";
 import { RulesEditor } from "@/components/form-builder/rules-editor";
+import { FormRunner } from "@/components/form-runner/form-runner";
 import { useFormBuilderStore } from "@/stores/form-builder-store";
 import { useFormsStore } from "@/stores/forms-store";
 import { useTranslation } from "@/lib/i18n/use-translation";
@@ -29,6 +37,7 @@ export function FormBuilder() {
   const { t } = useTranslation();
 
   const [saving, setSaving] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   async function handleSave() {
     if (!form.name.trim()) {
@@ -71,6 +80,14 @@ export function FormBuilder() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setPreviewOpen(true)}
+            disabled={form.fields.length === 0}
+          >
+            <Eye className="h-4 w-4" />
+            {t("builder.preview")}
+          </Button>
           <Button variant="outline" onClick={resetForm}>
             <FilePlus2 className="h-4 w-4" />
             {t("common.newForm")}
@@ -101,6 +118,19 @@ export function FormBuilder() {
 
       {/* Koşullu mantık kuralları */}
       <RulesEditor />
+
+      {/* Form önizleme paneli */}
+      <Sheet open={previewOpen} onOpenChange={setPreviewOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-lg">
+          <SheetHeader>
+            <SheetTitle>{form.name || t("builder.formName")}</SheetTitle>
+            <SheetDescription>{t("builder.previewDescription")}</SheetDescription>
+          </SheetHeader>
+          <div className="overflow-auto px-4 pb-4">
+            <FormRunner form={form} onSubmit={() => Promise.resolve()} />
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

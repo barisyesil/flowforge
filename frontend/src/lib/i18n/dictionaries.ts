@@ -119,6 +119,8 @@ const tr = {
   "builder.nameRequired": "Form adı boş olamaz.",
   "builder.needField": "Kaydetmeden önce en az bir alan ekleyin.",
   "builder.saveFailed": "Form kaydedilemedi.",
+  "builder.preview": "Önizle",
+  "builder.previewDescription": "Form, doldurulacağı haliyle önizlenir. Gönderim kaydedilmez.",
 
   // Alan tipleri
   "field.text": "Metin",
@@ -409,6 +411,8 @@ const en: Record<TranslationKey, string> = {
   "builder.nameRequired": "Form name cannot be empty.",
   "builder.needField": "Add at least one field before saving.",
   "builder.saveFailed": "Could not save the form.",
+  "builder.preview": "Preview",
+  "builder.previewDescription": "Preview the form as it will appear when filled out. Submissions are not saved.",
 
   "field.text": "Text",
   "field.textarea": "Long Text",
